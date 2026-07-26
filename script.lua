@@ -528,11 +528,16 @@ local lastFpsUpdate = 0
 local frameCount = 0
 
 local function IsVisible(targetPart)
-    local origin = Camera.CFrame.Position
-    local direction = (targetPart.Position - origin)
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("Head") then return true end
+    
+    local origin = character.Head.Position
+    local targetPos = targetPart.Position
+    local direction = (targetPos - origin)
+    
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = RaycastParams.FilterType.Exclude
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetPart.Parent}
+    raycastParams.FilterDescendantsInstances = {character, targetPart.Parent}
     raycastParams.IgnoreWater = true
     
     local result = Workspace:Raycast(origin, direction, raycastParams)
@@ -551,7 +556,8 @@ local function GetClosestTarget()
         if player ~= LocalPlayer and player.Character then
             local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
             if humanoid and humanoid.Health > 0 then
-                local targetPart = player.Character:FindFirstChild("HumanoidRootPart") or player.Character:FindFirstChild("Head")
+                -- Целимся в голову, так как она реже всего страдает от кривых огромных костюмов
+                local targetPart = player.Character:FindFirstChild("Head") or player.Character:FindFirstChild("HumanoidRootPart")
                 if targetPart and IsVisible(targetPart) then
                     local screenPoint, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
                     if onScreen then
