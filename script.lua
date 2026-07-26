@@ -527,26 +527,7 @@ local activeBoxes = {}
 local lastFpsUpdate = 0
 local frameCount = 0
 
-local function IsVisible(targetPart)
-    local character = LocalPlayer.Character
-    if not character or not character:FindFirstChild("Head") then return true end
-    
-    local origin = character.Head.Position
-    local targetPos = targetPart.Position
-    local direction = (targetPos - origin)
-    
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterType = RaycastParams.FilterType.Exclude
-    raycastParams.FilterDescendantsInstances = {character, targetPart.Parent}
-    raycastParams.IgnoreWater = true
-    
-    local result = Workspace:Raycast(origin, direction, raycastParams)
-    if result then
-        return false
-    end
-    return true
-end
-
+-- Безграничный аимбот без проверки видимости (захватывает цели через стены)
 local function GetClosestTarget()
     local closestTarget = nil
     local shortestDist = ScriptConfig.FOVSize
@@ -556,9 +537,8 @@ local function GetClosestTarget()
         if player ~= LocalPlayer and player.Character then
             local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
             if humanoid and humanoid.Health > 0 then
-                -- Целимся в голову, так как она реже всего страдает от кривых огромных костюмов
-                local targetPart = player.Character:FindFirstChild("Head") or player.Character:FindFirstChild("HumanoidRootPart")
-                if targetPart and IsVisible(targetPart) then
+                local targetPart = player.Character:FindFirstChild("HumanoidRootPart") or player.Character:FindFirstChild("Head")
+                if targetPart then
                     local screenPoint, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
                     if onScreen then
                         local dist = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
