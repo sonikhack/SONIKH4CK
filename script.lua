@@ -7,27 +7,16 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
--- Configuration Table
+-- Configuration
 getgenv().ScriptConfig = {
-    AutoPaint = {
-        Enabled = false,
-        CheckInterval = 0.1,
-    },
-    ESP = {
-        Enabled = false,
-        Color = Color3.fromRGB(255, 255, 255), -- Стандартный белый
-    },
-    WallHack = {
-        Enabled = false,
-    },
-    Aimbot = {
-        Enabled = false,
-        FOV = 120,
-        ShowFOV = true,
-    }
+    AutoPaint = false,
+    ESP = false,
+    WallHack = false,
+    Aimbot = false,
+    FOV = 120
 }
 
--- UI Initialization (SONIK HUB Branding)
+-- UI Initialization (SONIK HUB)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SonikHub_Menu"
 ScreenGui.ResetOnSpawn = false
@@ -52,16 +41,6 @@ Title.TextSize = 16
 Title.Font = Enum.Font.Code
 Title.Parent = MainFrame
 
--- FOV Circle for Aimbot
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Visible = false
-FOVCircle.Thickness = 1
-FOVCircle.NumSides = 64
-FOVCircle.Radius = ScriptConfig.Aimbot.FOV
-FOVCircle.Filled = false
-FOVCircle.Color = Color3.fromRGB(56, 189, 248)
-FOVCircle.Transparency = 1
-
 local function CreateToggle(name, yPos, callback)
     local Button = Instance.new("TextButton")
     Button.Size = UDim2.new(0.9, 0, 0, 35)
@@ -83,10 +62,10 @@ end
 
 -- 1. AUTO-PAINT
 CreateToggle("Auto-Paint", 55, function(state)
-    ScriptConfig.AutoPaint.Enabled = state
+    ScriptConfig.AutoPaint = state
     task.spawn(function()
-        while ScriptConfig.AutoPaint.Enabled do
-            task.wait(ScriptConfig.AutoPaint.CheckInterval)
+        while ScriptConfig.AutoPaint do
+            task.wait(0.1)
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
                 local rootPart = character.HumanoidRootPart
@@ -99,14 +78,11 @@ CreateToggle("Auto-Paint", 55, function(state)
                     rayResult = Workspace:Raycast(rootPart.Position, Vector3.new(0, -5, 0), rayParams)
                 end
                 
-                if rayResult and rayResult.Instance then
-                    local hitPart = rayResult.Instance
-                    if hitPart:IsA("BasePart") then
-                        local surfaceColor = hitPart.Color
-                        for _, part in ipairs(character:GetDescendants()) do
-                            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                                part.Color = surfaceColor
-                            end
+                if rayResult and rayResult.Instance and rayResult.Instance:IsA("BasePart") then
+                    local surfaceColor = rayResult.Instance.Color
+                    for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                            part.Color = surfaceColor
                         end
                     end
                 end
@@ -118,7 +94,7 @@ end)
 -- 2. ESP
 local espHighlights = {}
 CreateToggle("ESP Players", 100, function(state)
-    ScriptConfig.ESP.Enabled = state
+    ScriptConfig.ESP = state
     if not state then
         for _, h in pairs(espHighlights) do h:Destroy() end
         espHighlights = {}
@@ -126,18 +102,16 @@ CreateToggle("ESP Players", 100, function(state)
 end)
 
 RunService.RenderStepped:Connect(function()
-    if ScriptConfig.ESP.Enabled then
+    if ScriptConfig.ESP then
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character then
                 if not espHighlights[player] then
                     local hl = Instance.new("Highlight")
                     hl.Adornee = player.Character
-                    hl.FillColor = ScriptConfig.ESP.Color
+                    hl.FillColor = Color3.fromRGB(255, 255, 255)
                     hl.OutlineColor = Color3.fromRGB(0, 0, 0)
                     hl.Parent = player.Character
                     espHighlights[player] = hl
-                else
-                    espHighlights[player].FillColor = ScriptConfig.ESP.Color
                 end
             end
         end
@@ -146,12 +120,12 @@ end)
 
 -- 3. WALL HACK
 CreateToggle("WallHack (NoCollide)", 145, function(state)
-    ScriptConfig.WallHack.Enabled = state
+    ScriptConfig.WallHack = state
 end)
 
 RunService.Stepped:Connect(function()
     local character = LocalPlayer.Character
-    if character and ScriptConfig.WallHack.Enabled then
+    if character and ScriptConfig.WallHack then
         for _, part in ipairs(character:GetDescendants()) do
             if part:IsA("BasePart") then
                 if part.Name ~= "HumanoidRootPart" and part.Position.Y > character.PrimaryPart.Position.Y - 2 then
@@ -164,17 +138,15 @@ end)
 
 -- 4. AIMBOT
 CreateToggle("Aimbot", 190, function(state)
-    ScriptConfig.Aimbot.Enabled = state
-    FOVCircle.Visible = state
+    ScriptConfig.Aimbot = state
 end)
 
 RunService.RenderStepped:Connect(function()
-    FOVCircle.Position = UserInputService:GetMouseLocation()
-    if not ScriptConfig.Aimbot.Enabled then return end
+    if not ScriptConfig.Aimbot then return end
     
     if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
         local closestTarget = nil
-        local shortestDist = ScriptConfig.Aimbot.FOV
+        local shortestDist = ScriptConfig.FOV
         
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
