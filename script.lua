@@ -16,12 +16,8 @@ getgenv().ScriptConfig = {
     ESPColor = Color3.fromRGB(255, 50, 50),
     FPS = false,
     FPSUnlocker = false,
-    NoClip = false,
     AntiAFK = false,
-    FOVSize = 45,
-    FlyUp = false,
-    FlyDown = false,
-    FlySpeed = 50
+    FOVSize = 45
 }
 
 local SafeZonePosition = Vector3.new(436.69, 156.07, -154.02)
@@ -60,11 +56,17 @@ MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 28)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.fromRGB(0, 0, 0)
+Title.TextStrokeTransparency = 0
+Title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
 Title.Text = "SONIK HACK"
 Title.TextSize, Title.Font = 12, Enum.Font.Code
 Title.Parent = MainFrame
@@ -87,6 +89,10 @@ MinimizeButton.Font = Enum.Font.Code
 MinimizeButton.Active = true
 MinimizeButton.Draggable = true
 MinimizeButton.Parent = ToggleGui
+
+local MinimizeCorner = Instance.new("UICorner")
+MinimizeCorner.CornerRadius = UDim.new(1, 0)
+MinimizeCorner.Parent = MinimizeButton
 
 local isHidden = true
 local isAnimating = false
@@ -162,6 +168,10 @@ for i, tName in ipairs(tabNames) do
     tBtn.Font = Enum.Font.Code
     tBtn.Parent = TabContainer
     
+    local tCorner = Instance.new("UICorner")
+    tCorner.CornerRadius = UDim.new(0, 6)
+    tCorner.Parent = tBtn
+    
     tBtn.MouseButton1Click:Connect(function()
         ShowTab(tName)
     end)
@@ -183,6 +193,10 @@ aimSilentButton.Text = "AIM SILENT: [OFF]"
 aimSilentButton.TextSize, aimSilentButton.Font = 11, Enum.Font.Code
 aimSilentButton.Parent = Tabs.AIM
 
+local aimCorner = Instance.new("UICorner")
+aimCorner.CornerRadius = UDim.new(0, 6)
+aimCorner.Parent = aimSilentButton
+
 aimSilentButton.MouseButton1Click:Connect(function()
     ScriptConfig.AimSilent = not ScriptConfig.AimSilent
     UpdateButtonState(aimSilentButton, ScriptConfig.AimSilent, "AIM SILENT:")
@@ -195,6 +209,10 @@ FovContainer.Position = UDim2.new(0.18, 0, 0, 68)
 FovContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 FovContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
 FovContainer.Parent = Tabs.AIM
+
+local fovCorner = Instance.new("UICorner")
+fovCorner.CornerRadius = UDim.new(0, 6)
+fovCorner.Parent = FovContainer
 
 local FovLabel = Instance.new("TextLabel")
 FovLabel.Size = UDim2.new(1, 0, 0, 18)
@@ -219,6 +237,10 @@ SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SliderButton.Text = ""
 SliderButton.Parent = SliderBar
+
+local sliderBtnCorner = Instance.new("UICorner")
+sliderBtnCorner.CornerRadius = UDim.new(1, 0)
+sliderBtnCorner.Parent = SliderButton
 
 local draggingSlider = false
 SliderButton.MouseButton1Down:Connect(function() draggingSlider = true end)
@@ -248,6 +270,10 @@ espButton.Text = "ESP Players: [OFF]"
 espButton.TextSize, espButton.Font = 11, Enum.Font.Code
 espButton.Parent = Tabs.ESP
 
+local espCorner = Instance.new("UICorner")
+espCorner.CornerRadius = UDim.new(0, 6)
+espCorner.Parent = espButton
+
 espButton.MouseButton1Click:Connect(function()
     ScriptConfig.ESP = not ScriptConfig.ESP
     UpdateButtonState(espButton, ScriptConfig.ESP, "ESP Players:")
@@ -269,6 +295,10 @@ lineButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 lineButton.Text = "LINE: [OFF]"
 lineButton.TextSize, lineButton.Font = 11, Enum.Font.Code
 lineButton.Parent = Tabs.ESP
+
+local lineCorner = Instance.new("UICorner")
+lineCorner.CornerRadius = UDim.new(0, 6)
+lineCorner.Parent = lineButton
 
 lineButton.MouseButton1Click:Connect(function()
     ScriptConfig.ESPLine = not ScriptConfig.ESPLine
@@ -299,54 +329,14 @@ for i, clr in ipairs(paletteColors) do
     btn.Text = ""
     btn.Parent = ColorContainer
     
+    local clrCorner = Instance.new("UICorner")
+    clrCorner.CornerRadius = UDim.new(0, 6)
+    clrCorner.Parent = btn
+    
     btn.MouseButton1Click:Connect(function()
         ScriptConfig.ESPColor = clr
     end)
 end
-
--- Отдельное мини-меню полета для No Clip (Up / Down)
-local FlyMiniGui = Instance.new("ScreenGui")
-FlyMiniGui.Name = "SonikFlyMini"
-FlyMiniGui.ResetOnSpawn = false
-FlyMiniGui.Enabled = false
-FlyMiniGui.Parent = game.CoreGui
-
-local FlyFrame = Instance.new("Frame")
-FlyFrame.Size = UDim2.new(0, 120, 0, 55)
-FlyFrame.Position = UDim2.new(0.5, -60, 0.8, 0)
-FlyFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-FlyFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-FlyFrame.BorderSizePixel = 1
-FlyFrame.Active = true
-FlyFrame.Draggable = true
-FlyFrame.Parent = FlyMiniGui
-
-local btnUp = Instance.new("TextButton")
-btnUp.Size = UDim2.new(0.5, -4, 1, -6)
-btnUp.Position = UDim2.new(0, 2, 0, 3)
-btnUp.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-btnUp.BorderColor3 = Color3.fromRGB(255, 255, 255)
-btnUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnUp.Text = "UP"
-btnUp.TextSize = 11
-btnUp.Font = Enum.Font.Code
-btnUp.Parent = FlyFrame
-
-local btnDown = Instance.new("TextButton")
-btnDown.Size = UDim2.new(0.5, -4, 1, -6)
-btnDown.Position = UDim2.new(0.5, 2, 0, 3)
-btnDown.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-btnDown.BorderColor3 = Color3.fromRGB(255, 255, 255)
-btnDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-btnDown.Text = "DOWN"
-btnDown.TextSize = 11
-btnDown.Font = Enum.Font.Code
-btnDown.Parent = FlyFrame
-
-btnUp.MouseButton1Down:Connect(function() ScriptConfig.FlyUp = true end)
-btnUp.MouseButton1Up:Connect(function() ScriptConfig.FlyUp = false end)
-btnDown.MouseButton1Down:Connect(function() ScriptConfig.FlyDown = true end)
-btnDown.MouseButton1Up:Connect(function() ScriptConfig.FlyDown = false end)
 
 -- MISC Вкладка с прокруткой
 local MiscScroll = Instance.new("ScrollingFrame")
@@ -354,7 +344,7 @@ MiscScroll.Size = UDim2.new(0.8, 0, 0, 145)
 MiscScroll.Position = UDim2.new(0.18, 0, 0, 32)
 MiscScroll.BackgroundTransparency = 1
 MiscScroll.BorderSizePixel = 0
-MiscScroll.CanvasSize = UDim2.new(0, 0, 0, 185)
+MiscScroll.CanvasSize = UDim2.new(0, 0, 0, 160)
 MiscScroll.ScrollBarThickness = 3
 MiscScroll.Parent = Tabs.MISC
 
@@ -368,6 +358,11 @@ local function createMiscButton(posY, text)
     btn.Text = text
     btn.TextSize, btn.Font = 10, Enum.Font.Code
     btn.Parent = MiscScroll
+    
+    local mBtnCorner = Instance.new("UICorner")
+    mBtnCorner.CornerRadius = UDim.new(0, 6)
+    mBtnCorner.Parent = btn
+    
     return btn
 end
 
@@ -379,32 +374,28 @@ rejoinButton.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 2. NO CLIP (+ отдельное меню полета и обход анти-чита Chameleon)
-local noclipButton = createMiscButton(30, "NO CLIP [OFF]")
-noclipButton.MouseButton1Click:Connect(function()
-    ScriptConfig.NoClip = not ScriptConfig.NoClip
-    UpdateButtonState(noclipButton, ScriptConfig.NoClip, "NO CLIP")
-    FlyMiniGui.Enabled = ScriptConfig.NoClip
-end)
-
--- 3. ANTI AFK
-local afkButton = createMiscButton(60, "ANTI AFK [OFF]")
+-- 2. ANTI AFK
+local afkButton = createMiscButton(30, "ANTI AFK [OFF]")
 afkButton.MouseButton1Click:Connect(function()
     ScriptConfig.AntiAFK = not ScriptConfig.AntiAFK
     UpdateButtonState(afkButton, ScriptConfig.AntiAFK, "ANTI AFK")
 end)
 
--- 4. TP SAFE ZONE
-local safeTpButton = createMiscButton(90, "TP SAFE ZONE")
+-- 3. TP SAFE ZONE (Исправление пропасти персонажа и chams после телепортации)
+local safeTpButton = createMiscButton(60, "TP SAFE ZONE")
 safeTpButton.MouseButton1Click:Connect(function()
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
         char.HumanoidRootPart.CFrame = CFrame.new(SafeZonePosition)
+        task.wait(0.1)
+        if char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
     end
 end)
 
--- 5. FPS UNLOCKER
-local fpsUnlockButton = createMiscButton(120, "FPS UNLOCKER [OFF]")
+-- 4. FPS UNLOCKER
+local fpsUnlockButton = createMiscButton(90, "FPS UNLOCKER [OFF]")
 fpsUnlockButton.MouseButton1Click:Connect(function()
     ScriptConfig.FPSUnlocker = not ScriptConfig.FPSUnlocker
     UpdateButtonState(fpsUnlockButton, ScriptConfig.FPSUnlocker, "FPS UNLOCKER")
@@ -415,8 +406,8 @@ fpsUnlockButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6. FPS / PING
-local fpsPingButton = createMiscButton(150, "FPS / PING [OFF]")
+-- 5. FPS / PING
+local fpsPingButton = createMiscButton(120, "FPS / PING [OFF]")
 local StatsDisplay = Instance.new("TextLabel")
 StatsDisplay.Size = UDim2.new(0, 120, 0, 40)
 StatsDisplay.Position = UDim2.new(0, 10, 1, -45)
@@ -436,7 +427,7 @@ fpsPingButton.MouseButton1Click:Connect(function()
     StatsDisplay.Visible = ScriptConfig.FPS
 end)
 
--- DEV Вкладка (с точным оформлением каждого слова и открытием ссылки в браузере)
+-- DEV Вкладка
 local DevContainer = Instance.new("TextButton")
 DevContainer.Size = UDim2.new(0.8, 0, 0, 75)
 DevContainer.Position = UDim2.new(0.18, 0, 0, 32)
@@ -447,6 +438,10 @@ DevContainer.Text = ""
 DevContainer.Visible = false
 DevContainer.Parent = Tabs.DEV
 
+local devContainerCorner = Instance.new("UICorner")
+devContainerCorner.CornerRadius = UDim.new(0, 6)
+devContainerCorner.Parent = DevContainer
+
 local DevRichLabel = Instance.new("TextLabel")
 DevRichLabel.Size = UDim2.new(1, -6, 1, -4)
 DevRichLabel.Position = UDim2.new(0, 3, 0, 2)
@@ -455,7 +450,6 @@ DevRichLabel.TextWrapped = true
 DevRichLabel.TextXAlignment = Enum.TextXAlignment.Left
 DevRichLabel.TextYAlignment = Enum.TextYAlignment.Top
 DevRichLabel.RichText = true
--- Точная покраска по твоим правилам: гласные/согласные только у CHAMELEON, раздельные цвета для tg, Telegram, Channel и сброс на белые
 DevRichLabel.Text = 'SONIK HACK SCRIPT FOR <font color="rgb(50,255,50)">C</font><font color="rgb(255,140,0)">H</font><font color="rgb(50,255,50)">A</font><font color="rgb(50,255,50)">M</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">L</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">O</font><font color="rgb(255,140,0)">N</font><font color="rgb(255,255,255)"><br/><font color="rgb(0,136,204)">tg</font> @sonik_hack<br/>Other scripts on <font color="rgb(0,136,204)">Telegram</font> <font color="rgb(245,222,179)">Channel</font> @dev_sonik</font>'
 DevRichLabel.TextSize, DevRichLabel.Font = 8, Enum.Font.Code
 DevRichLabel.Parent = DevContainer
@@ -479,7 +473,6 @@ local activeLines = {}
 local lastFpsUpdate = 0
 local frameCount = 0
 
--- Плавный полет (Fly) и NoClip с обходом анти-чита стен Chameleon
 RunService.RenderStepped:Connect(function(dt)
     if ScriptConfig.FPS then
         frameCount = frameCount + 1
@@ -493,37 +486,6 @@ RunService.RenderStepped:Connect(function(dt)
             StatsDisplay.Text = string.format("FPS: %d\nPING: %dms", currentFPS, currentPing)
             frameCount = 0
             lastFpsUpdate = currentTick
-        end
-    end
-
-    local char = LocalPlayer.Character
-    if char then
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        
-        if ScriptConfig.NoClip then
-            for _, part in ipairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-            
-            if hrp then
-                local moveDir = humanoid and humanoid.MoveDirection or Vector3.new(0,0,0)
-                local flySpeed = ScriptConfig.FlySpeed
-                local yVel = 0
-                
-                if ScriptConfig.FlyUp then yVel = flySpeed elseif ScriptConfig.FlyDown then yVel = -flySpeed end
-                
-                if moveDir.Magnitude > 0 or yVel ~= 0 then
-                    hrp.Velocity = Vector3.new(moveDir.X * flySpeed, yVel, moveDir.Z * flySpeed)
-                    hrp.AssemblyLinearVelocity = hrp.Velocity
-                else
-                    -- Зависание в воздухе при остановке (фикс падения и смещения)
-                    hrp.Velocity = Vector3.new(0, 0, 0)
-                    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                end
-            end
         end
     end
 
@@ -620,7 +582,7 @@ setreadonly(mt, false)
 mt.__index = newcclosure(function(self, k)
     if ScriptConfig.AimSilent and not checkcaller() then
         if k == "Hit" then
-            local target = GetClosestVisibleTarget()
+            let target = GetClosestVisibleTarget()
             if target then
                 return target.CFrame
             end
