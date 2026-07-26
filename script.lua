@@ -10,13 +10,14 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
 getgenv().ScriptConfig = {
-    AimSilent = false,
+    Aimbot = false,
     ESP = false,
     ESPLine = false,
     ESPColor = Color3.fromRGB(255, 50, 50),
     FPS = false,
     FPSUnlocker = false,
     AntiAFK = false,
+    WaterKey = false,
     FOVSize = 45
 }
 
@@ -93,6 +94,35 @@ MinimizeButton.Parent = ToggleGui
 local MinimizeCorner = Instance.new("UICorner")
 MinimizeCorner.CornerRadius = UDim.new(1, 0)
 MinimizeCorner.Parent = MinimizeButton
+
+local WaterKeyButton = Instance.new("TextButton")
+WaterKeyButton.Size = UDim2.new(0, 42, 0, 42)
+WaterKeyButton.Position = UDim2.new(0.5, -152, 0.5, -92)
+WaterKeyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+WaterKeyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+WaterKeyButton.BorderSizePixel = 1
+WaterKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+WaterKeyButton.Text = "KEY"
+WaterKeyButton.TextSize = 12
+WaterKeyButton.Font = Enum.Font.Code
+WaterKeyButton.Active = true
+WaterKeyButton.Draggable = true
+WaterKeyButton.Visible = false
+WaterKeyButton.Parent = ToggleGui
+
+local WaterKeyCorner = Instance.new("UICorner")
+WaterKeyCorner.CornerRadius = UDim.new(1, 0)
+WaterKeyCorner.Parent = WaterKeyButton
+
+local function UpdateWaterKeyVisual()
+    if ScriptConfig.WaterKey then
+        WaterKeyButton.BorderColor3 = Color3.fromRGB(50, 255, 50)
+        WaterKeyButton.TextColor3 = Color3.fromRGB(50, 255, 50)
+    else
+        WaterKeyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+        WaterKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+end
 
 local isHidden = true
 local isAnimating = false
@@ -180,30 +210,56 @@ local function UpdateButtonState(btn, state, text)
     btn.BorderColor3 = state and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 255, 255)
 end
 
--- AIM вкладка
-local aimSilentButton = Instance.new("TextButton")
-aimSilentButton.Size = UDim2.new(0.8, 0, 0, 32)
-aimSilentButton.Position = UDim2.new(0.18, 0, 0, 32)
-aimSilentButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-aimSilentButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-aimSilentButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-aimSilentButton.Text = "AIM SILENT: [OFF]"
-aimSilentButton.TextSize, aimSilentButton.Font = 11, Enum.Font.Code
-aimSilentButton.Parent = Tabs.AIM
+local aimbotButton = Instance.new("TextButton")
+aimbotButton.Size = UDim2.new(0.8, 0, 0, 32)
+aimbotButton.Position = UDim2.new(0.18, 0, 0, 32)
+aimbotButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+aimbotButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+aimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+aimbotButton.Text = "AIMBOT: [OFF]"
+aimbotButton.TextSize, aimbotButton.Font = 11, Enum.Font.Code
+aimbotButton.Parent = Tabs.AIM
 
 local aimCorner = Instance.new("UICorner")
 aimCorner.CornerRadius = UDim.new(0, 6)
-aimCorner.Parent = aimSilentButton
+aimCorner.Parent = aimbotButton
 
-aimSilentButton.MouseButton1Click:Connect(function()
-    ScriptConfig.AimSilent = not ScriptConfig.AimSilent
-    UpdateButtonState(aimSilentButton, ScriptConfig.AimSilent, "AIM SILENT:")
-    FOVCircle.Visible = ScriptConfig.AimSilent
+local function ToggleAimbot()
+    ScriptConfig.Aimbot = not ScriptConfig.Aimbot
+    UpdateButtonState(aimbotButton, ScriptConfig.Aimbot, "AIMBOT:")
+    FOVCircle.Visible = ScriptConfig.Aimbot
+    UpdateWaterKeyVisual()
+end
+
+aimbotButton.MouseButton1Click:Connect(ToggleAimbot)
+
+WaterKeyButton.MouseButton1Click:Connect(function()
+    ToggleAimbot()
+end)
+
+local waterKeyMenuButton = Instance.new("TextButton")
+waterKeyMenuButton.Size = UDim2.new(0.8, 0, 0, 32)
+waterKeyMenuButton.Position = UDim2.new(0.18, 0, 0, 68)
+waterKeyMenuButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+waterKeyMenuButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+waterKeyMenuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+waterKeyMenuButton.Text = "WATER KEY: [OFF]"
+waterKeyMenuButton.TextSize, waterKeyMenuButton.Font = 11, Enum.Font.Code
+waterKeyMenuButton.Parent = Tabs.AIM
+
+local waterKeyCorner = Instance.new("UICorner")
+waterKeyCorner.CornerRadius = UDim.new(0, 6)
+waterKeyCorner.Parent = waterKeyMenuButton
+
+waterKeyMenuButton.MouseButton1Click:Connect(function()
+    ScriptConfig.WaterKey = not ScriptConfig.WaterKey
+    UpdateButtonState(waterKeyMenuButton, ScriptConfig.WaterKey, "WATER KEY:")
+    WaterKeyButton.Visible = ScriptConfig.WaterKey
 end)
 
 local FovContainer = Instance.new("Frame")
 FovContainer.Size = UDim2.new(0.8, 0, 0, 42)
-FovContainer.Position = UDim2.new(0.18, 0, 0, 68)
+FovContainer.Position = UDim2.new(0.18, 0, 0, 104)
 FovContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 FovContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
 FovContainer.Parent = Tabs.AIM
@@ -257,7 +313,6 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- ESP вкладка
 local espButton = Instance.new("TextButton")
 espButton.Size = UDim2.new(0.8, 0, 0, 32)
 espButton.Position = UDim2.new(0.18, 0, 0, 32)
@@ -336,7 +391,6 @@ for i, clr in ipairs(paletteColors) do
     end)
 end
 
--- MISC Вкладка с прокруткой
 local MiscScroll = Instance.new("ScrollingFrame")
 MiscScroll.Size = UDim2.new(0.8, 0, 0, 145)
 MiscScroll.Position = UDim2.new(0.18, 0, 0, 32)
@@ -422,7 +476,6 @@ fpsPingButton.MouseButton1Click:Connect(function()
     StatsDisplay.Visible = ScriptConfig.FPS
 end)
 
--- DEV Вкладка
 local DevContainer = Instance.new("TextButton")
 DevContainer.Size = UDim2.new(0.8, 0, 0, 75)
 DevContainer.Position = UDim2.new(0.18, 0, 0, 32)
@@ -445,7 +498,8 @@ DevRichLabel.TextWrapped = true
 DevRichLabel.TextXAlignment = Enum.TextXAlignment.Left
 DevRichLabel.TextYAlignment = Enum.TextYAlignment.Top
 DevRichLabel.RichText = true
-DevRichLabel.Text = 'SONIK HACK FOR <font color="rgb(50,255,50)">C</font><font color="rgb(255,140,0)">H</font><font color="rgb(50,255,50)">A</font><font color="rgb(50,255,50)">M</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">L</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">O</font><font color="rgb(255,140,0)">N</font><font color="rgb(255,255,255)"><br/><font color="rgb(0,136,204)">tg</font> @sonik_hack<br/>Other scripts on <font color="rgb(0,136,204)">Telegram</font> <font color="rgb(245,222,179)">Channel</font> @dev_sonik</font>'
+-- Исправлены цвета слов SONIK HACK FOR на чистый белый цвет
+DevRichLabel.Text = '<font color="rgb(255,255,255)">SONIK HACK FOR </font><font color="rgb(255,255,255)">CHAMELEON</font><br/><font color="rgb(200,200,200)">tg</font> @sonik_hack<br/><font color="rgb(200,200,200)">Other scripts on Telegram Channel @dev_sonik</font>'
 DevRichLabel.TextSize, DevRichLabel.Font = 8, Enum.Font.Code
 DevRichLabel.Parent = DevContainer
 
@@ -454,6 +508,32 @@ ShowTab("AIM")
 local activeLines = {}
 local lastFpsUpdate = 0
 local frameCount = 0
+
+local function GetClosestTarget()
+    local closestTarget = nil
+    local shortestDist = ScriptConfig.FOVSize
+    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid and humanoid.Health > 0 then
+                local targetPart = player.Character:FindFirstChild("HumanoidRootPart") or player.Character:FindFirstChild("Head")
+                if targetPart then
+                    local screenPoint, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+                    if onScreen then
+                        local dist = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
+                        if dist < shortestDist then
+                            shortestDist = dist
+                            closestTarget = targetPart
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return closestTarget
+end
 
 RunService.RenderStepped:Connect(function(dt)
     if ScriptConfig.FPS then
@@ -518,58 +598,13 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
 
-    if ScriptConfig.AimSilent then
+    if ScriptConfig.Aimbot then
         FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
         FOVCircle.Radius = ScriptConfig.FOVSize
-    end
-end)
-
-local function GetClosestVisibleTarget()
-    local closestTarget = nil
-    local shortestDist = ScriptConfig.FOVSize
-    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-    
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid and humanoid.Health > 0 then
-                local targetPart = player.Character:FindFirstChild("Head") or player.Character:FindFirstChild("HumanoidRootPart")
-                if targetPart then
-                    local screenPoint, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
-                        if dist < shortestDist then
-                            local rayParams = RaycastParams.new()
-                            rayParams.FilterDescendantsInstances = {LocalPlayer.Character, player.Character}
-                            rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                            local rayResult = Workspace:Raycast(Camera.CFrame.Position, (targetPart.Position - Camera.CFrame.Position), rayParams)
-                            
-                            if not rayResult or (rayResult.Instance and rayResult.Instance.Transparency > 0.5) or (rayResult.Instance and rayResult.Instance.Size.Magnitude < 3) then
-                                shortestDist = dist
-                                closestTarget = targetPart
-                            end
-                        end
-                    end
-                end
-            end
+        
+        local target = GetClosestTarget()
+        if target then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
         end
     end
-    return closestTarget
-end
-
-local mt = getrawmetatable(game)
-local oldIndex = mt.__index
-setreadonly(mt, false)
-
-mt.__index = newcclosure(function(self, k)
-    if ScriptConfig.AimSilent and not checkcaller() then
-        if k == "Hit" then
-            local target = GetClosestVisibleTarget()
-            if target then
-                return target.CFrame
-            end
-        end
-    end
-    return oldIndex(self, k)
 end)
-setreadonly(mt, true)
