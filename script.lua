@@ -1,20 +1,25 @@
 -- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
 
 -- Configuration
 getgenv().ScriptConfig = {
-    AutoPaint = false,
     ESP = false,
+    ESPColorIndex = 1,
     WallHack = false,
-    Aimbot = false,
-    FOV = 120
 }
+
+-- Colors for ESP (White, Red, Blue, Green)
+local ESPColors = {
+    Color3.fromRGB(255, 255, 255), -- Белый
+    Color3.fromRGB(255, 50, 50),   -- Красный
+    Color3.fromRGB(50, 100, 255),  -- Синий
+    Color3.fromRGB(50, 255, 50)    -- Зеленый
+}
+local ESPColorNames = {"White", "Red", "Blue", "Green"}
 
 -- UI Initialization (SONIK HUB)
 local ScreenGui = Instance.new("ScreenGui")
@@ -22,9 +27,10 @@ ScreenGui.Name = "SonikHub_Menu"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = game.CoreGui
 
+-- Главное меню (высота подогнана строго под содержимое, без лишнего пустого места)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -190)
+MainFrame.Size = UDim2.new(0, 320, 0, 160)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -80)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 23, 42)
 MainFrame.BorderColor3 = Color3.fromRGB(56, 189, 248)
 MainFrame.BorderSizePixel = 1
@@ -33,148 +39,121 @@ MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
 Title.TextColor3 = Color3.fromRGB(56, 189, 248)
 Title.Text = "SONIK HUB"
-Title.TextSize = 16
+Title.TextSize = 15
 Title.Font = Enum.Font.Code
 Title.Parent = MainFrame
 
-local function CreateToggle(name, yPos, callback)
+-- Кнопка сворачивания с текстом [ SH¿ ]
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Size = UDim2.new(0, 40, 0, 35)
+MinimizeButton.Position = UDim2.new(1, -40, 0, 0)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
+MinimizeButton.BorderColor3 = Color3.fromRGB(56, 189, 248)
+MinimizeButton.TextColor3 = Color3.fromRGB(56, 189, 248)
+MinimizeButton.Text = "SH¿"
+MinimizeButton.TextSize = 11
+MinimizeButton.Font = Enum.Font.Code
+MinimizeButton.Parent = MainFrame
+
+local isMinimized = false
+MinimizeButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    for _, child in ipairs(MainFrame:GetChildren()) do
+        if child ~= Title and child ~= MinimizeButton then
+            child.Visible = not isMinimized
+        end
+    end
+    MainFrame.Size = isMinimized and UDim2.new(0, 320, 0, 35) or UDim2.new(0, 320, 0, 160)
+end)
+
+local function CreateButton(yPos, initialText, callback)
     local Button = Instance.new("TextButton")
     Button.Size = UDim2.new(0.9, 0, 0, 35)
     Button.Position = UDim2.new(0.05, 0, 0, yPos)
     Button.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
     Button.BorderColor3 = Color3.fromRGB(56, 189, 248)
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.Text = name .. ": [OFF]"
+    Button.Text = initialText
     Button.TextSize, Button.Font = 12, Enum.Font.Code
     Button.Parent = MainFrame
     
-    local state = false
-    Button.MouseButton1Click:Connect(function()
-        state = not state
-        Button.Text = name .. ": " .. (state and "[ON]" or "[OFF]")
-        callback(state)
-    end)
+    Button.MouseButton1Click:Connect(callback)
+    return Button
 end
 
--- 1. AUTO-PAINT
-CreateToggle("Auto-Paint", 55, function(state)
-    ScriptConfig.AutoPaint = state
-    task.spawn(function()
-        while ScriptConfig.AutoPaint do
-            task.wait(0.1)
-            local character = LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local rootPart = character.HumanoidRootPart
-                local rayParams = RaycastParams.new()
-                rayParams.FilterDescendantsInstances = {character}
-                rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                
-                local rayResult = Workspace:Raycast(rootPart.Position, rootPart.CFrame.LookVector * 3, rayParams)
-                if not rayResult then
-                    rayResult = Workspace:Raycast(rootPart.Position, Vector3.new(0, -5, 0), rayParams)
-                end
-                
-                if rayResult and rayResult.Instance and rayResult.Instance:IsA("BasePart") then
-                    local surfaceColor = rayResult.Instance.Color
-                    for _, part in ipairs(character:GetDescendants()) do
-                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                            part.Color = surfaceColor
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end)
-
--- 2. ESP
-local espHighlights = {}
-CreateToggle("ESP Players", 100, function(state)
-    ScriptConfig.ESP = state
-    if not state then
-        for _, h in pairs(espHighlights) do h:Destroy() end
-        espHighlights = {}
-    end
-end)
-
-RunService.RenderStepped:Connect(function()
-    if ScriptConfig.ESP then
+-- 1. ESP TOGGLE
+local espButton
+espButton = CreateButton(42, "ESP Players: [OFF]", function()
+    ScriptConfig.ESP = not ScriptConfig.ESP
+    espButton.Text = "ESP Players: " .. (ScriptConfig.ESP and "[ON]" or "[OFF]")
+    if not ScriptConfig.ESP then
         for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                if not espHighlights[player] then
-                    local hl = Instance.new("Highlight")
-                    hl.Adornee = player.Character
-                    hl.FillColor = Color3.fromRGB(255, 255, 255)
-                    hl.OutlineColor = Color3.fromRGB(0, 0, 0)
-                    hl.Parent = player.Character
-                    espHighlights[player] = hl
-                end
+            if player.Character and player.Character:FindFirstChild("SonikESP") then
+                player.Character.SonikESP:Destroy()
             end
         end
     end
+end)
+
+-- 2. ESP COLOR SELECTOR (Красный, синий, зеленый, белый)
+local colorButton
+colorButton = CreateButton(80, "ESP Color: [White]", function()
+    ScriptConfig.ESPColorIndex = ScriptConfig.ESPColorIndex + 1
+    if ScriptConfig.ESPColorIndex > #ESPColors then
+        ScriptConfig.ESPColorIndex = 1
+    end
+    colorButton.Text = "ESP Color: [" .. ESPColorNames[ScriptConfig.ESPColorIndex] .. "]"
 end)
 
 -- 3. WALL HACK
-CreateToggle("WallHack (NoCollide)", 145, function(state)
-    ScriptConfig.WallHack = state
+local whButton
+whButton = CreateButton(118, "WallHack: [OFF]", function()
+    ScriptConfig.WallHack = not ScriptConfig.WallHack
+    whButton.Text = "WallHack: " .. (ScriptConfig.WallHack and "[ON]" or "[OFF]")
+    
+    local character = LocalPlayer.Character
+    if character then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.CanCollide = not ScriptConfig.WallHack
+            end
+        end
+    end
 end)
 
+-- ESP Loop
+RunService.RenderStepped:Connect(function()
+    if ScriptConfig.ESP then
+        local currentColor = ESPColors[ScriptConfig.ESPColorIndex]
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local highlight = player.Character:FindFirstChild("SonikESP")
+                if not highlight then
+                    highlight = Instance.new("Highlight")
+                    highlight.Name = "SonikESP"
+                    highlight.Adornee = player.Character
+                    highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+                    highlight.Parent = player.Character
+                end
+                highlight.FillColor = currentColor
+            end
+        end
+    end
+end)
+
+-- WallHack Loop
 RunService.Stepped:Connect(function()
     local character = LocalPlayer.Character
     if character and ScriptConfig.WallHack then
         for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                if part.Name ~= "HumanoidRootPart" and part.Position.Y > character.PrimaryPart.Position.Y - 2 then
-                    part.CanCollide = false
-                end
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.CanCollide = false
             end
-        end
-    end
-end)
-
--- 4. AIMBOT
-CreateToggle("Aimbot", 190, function(state)
-    ScriptConfig.Aimbot = state
-end)
-
-RunService.RenderStepped:Connect(function()
-    if not ScriptConfig.Aimbot then return end
-    
-    if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-        local closestTarget = nil
-        local shortestDist = ScriptConfig.FOV
-        
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
-                local torso = player.Character:FindFirstChild("UpperTorso") or player.Character:FindFirstChild("Torso")
-                if torso then
-                    local screenPoint, onScreen = Camera:WorldToViewportPoint(torso.Position)
-                    if onScreen then
-                        local mousePos = UserInputService:GetMouseLocation()
-                        local dist = (Vector2.new(screenPoint.X, screenPoint.Y) - mousePos).Magnitude
-                        
-                        if dist < shortestDist then
-                            local rayParams = RaycastParams.new()
-                            rayParams.FilterDescendantsInstances = {LocalPlayer.Character, player.Character}
-                            rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                            local ray = Workspace:Raycast(Camera.CFrame.Position, (torso.Position - Camera.CFrame.Position).Unit * 500, rayParams)
-                            
-                            if not ray then
-                                shortestDist = dist
-                                closestTarget = torso
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        
-        if closestTarget then
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
         end
     end
 end)
