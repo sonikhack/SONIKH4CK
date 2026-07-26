@@ -4,6 +4,8 @@ local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
+local Stats = game:GetService("Stats")
+local MarketPlaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
@@ -13,13 +15,26 @@ getgenv().ScriptConfig = {
     ESP = false,
     ESPLine = false,
     ESPColor = Color3.fromRGB(255, 50, 50),
-    FPSColor = Color3.fromRGB(255, 255, 255),
     FPS = false,
+    FPSUnlocker = false,
+    NoClip = false,
+    AntiAFK = false,
     FOVSize = 45
 }
 
+local SafeZonePosition = Vector3.new(436.69, 156.07, -154.02)
+
+LocalPlayer.Idled:Connect(function()
+    if ScriptConfig.AntiAFK then
+        local vu = game:GetService("VirtualUser")
+        vu:Button2Down(Vector2.new(0,0), Camera.CFrame)
+        task.wait(1)
+        vu:Button2Up(Vector2.new(0,0), Camera.CFrame)
+    end
+end)
+
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Sonik_Hub"
+ScreenGui.Name = "SonikHack"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = game.CoreGui
 
@@ -32,9 +47,10 @@ FOVCircle.NumSides = 64
 FOVCircle.Radius = ScriptConfig.FOVSize
 FOVCircle.Filled = false
 
+-- Общая рамка меню с учетом блока DEV внизу
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 280, 0, 215)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -107)
+MainFrame.Size = UDim2.new(0, 280, 0, 235)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -117)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BorderSizePixel = 1
@@ -53,13 +69,13 @@ Title.TextSize, Title.Font = 12, Enum.Font.Code
 Title.Parent = MainFrame
 
 local ToggleGui = Instance.new("ScreenGui")
-ToggleGui.Name = "Sonik_Hub_ToggleOnly"
+ToggleGui.Name = "SonikHack_Toggle"
 ToggleGui.ResetOnSpawn = false
 ToggleGui.Parent = game.CoreGui
 
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Size = UDim2.new(0, 42, 0, 42)
-MinimizeButton.Position = UDim2.new(0.5, 110, 0.5, -107)
+MinimizeButton.Position = UDim2.new(0.5, 110, 0.5, -117)
 MinimizeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MinimizeButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 MinimizeButton.BorderSizePixel = 1
@@ -84,8 +100,8 @@ local function AnimateMenu(open)
         MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         
         local tw = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 280, 0, 215),
-            Position = UDim2.new(0.5, -140, 0.5, -107)
+            Size = UDim2.new(0, 280, 0, 235),
+            Position = UDim2.new(0.5, -140, 0.5, -117)
         })
         tw:Play()
         tw.Completed:Wait()
@@ -126,7 +142,7 @@ local function ShowTab(tabName)
 end
 
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(0, 30, 0, 175)
+TabContainer.Size = UDim2.new(0, 30, 0, 145)
 TabContainer.Position = UDim2.new(0, 6, 0, 32)
 TabContainer.BackgroundTransparency = 1
 TabContainer.Parent = MainFrame
@@ -134,8 +150,8 @@ TabContainer.Parent = MainFrame
 local tabNames = {"AIM", "ESP", "MISC"}
 for i, tName in ipairs(tabNames) do
     local tBtn = Instance.new("TextButton")
-    tBtn.Size = UDim2.new(0, 30, 0, 56)
-    tBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 60)
+    tBtn.Size = UDim2.new(0, 30, 0, 46)
+    tBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 50)
     tBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     tBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
     tBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -154,8 +170,9 @@ local function UpdateButtonState(btn, state, text)
     btn.BorderColor3 = state and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 255, 255)
 end
 
+-- AIM вкладка
 local aimSilentButton = Instance.new("TextButton")
-aimSilentButton.Size = UDim2.new(0.8, 0, 0, 36)
+aimSilentButton.Size = UDim2.new(0.8, 0, 0, 32)
 aimSilentButton.Position = UDim2.new(0.18, 0, 0, 32)
 aimSilentButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 aimSilentButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
@@ -171,14 +188,14 @@ aimSilentButton.MouseButton1Click:Connect(function()
 end)
 
 local FovContainer = Instance.new("Frame")
-FovContainer.Size = UDim2.new(0.8, 0, 0, 45)
-FovContainer.Position = UDim2.new(0.18, 0, 0, 74)
+FovContainer.Size = UDim2.new(0.8, 0, 0, 42)
+FovContainer.Position = UDim2.new(0.18, 0, 0, 68)
 FovContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 FovContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
 FovContainer.Parent = Tabs.AIM
 
 local FovLabel = Instance.new("TextLabel")
-FovLabel.Size = UDim2.new(1, 0, 0, 20)
+FovLabel.Size = UDim2.new(1, 0, 0, 18)
 FovLabel.Position = UDim2.new(0, 0, 0, 2)
 FovLabel.BackgroundTransparency = 1
 FovLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -188,7 +205,7 @@ FovLabel.Parent = FovContainer
 
 local SliderBar = Instance.new("Frame")
 SliderBar.Size = UDim2.new(0.8, 0, 0, 3)
-SliderBar.Position = UDim2.new(0.1, 0, 0, 28)
+SliderBar.Position = UDim2.new(0.1, 0, 0, 26)
 SliderBar.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 SliderBar.BorderSizePixel = 0
 SliderBar.Parent = FovContainer
@@ -218,8 +235,9 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+-- ESP вкладка
 local espButton = Instance.new("TextButton")
-espButton.Size = UDim2.new(0.8, 0, 0, 36)
+espButton.Size = UDim2.new(0.8, 0, 0, 32)
 espButton.Position = UDim2.new(0.18, 0, 0, 32)
 espButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 espButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
@@ -241,8 +259,8 @@ espButton.MouseButton1Click:Connect(function()
 end)
 
 local lineButton = Instance.new("TextButton")
-lineButton.Size = UDim2.new(0.8, 0, 0, 36)
-lineButton.Position = UDim2.new(0.18, 0, 0, 74)
+lineButton.Size = UDim2.new(0.8, 0, 0, 32)
+lineButton.Position = UDim2.new(0.18, 0, 0, 68)
 lineButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 lineButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 lineButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -256,8 +274,8 @@ lineButton.MouseButton1Click:Connect(function()
 end)
 
 local ColorContainer = Instance.new("Frame")
-ColorContainer.Size = UDim2.new(0.8, 0, 0, 32)
-ColorContainer.Position = UDim2.new(0.18, 0, 0, 116)
+ColorContainer.Size = UDim2.new(0.8, 0, 0, 28)
+ColorContainer.Position = UDim2.new(0.18, 0, 0, 104)
 ColorContainer.BackgroundTransparency = 1
 ColorContainer.Parent = Tabs.ESP
 
@@ -272,8 +290,8 @@ local paletteColors = {
 
 for i, clr in ipairs(paletteColors) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 28, 0, 28)
-    btn.Position = UDim2.new(0, (i - 1) * 33, 0, 0)
+    btn.Size = UDim2.new(0, 24, 0, 24)
+    btn.Position = UDim2.new(0, (i - 1) * 29, 0, 0)
     btn.BackgroundColor3 = clr
     btn.BorderColor3 = Color3.fromRGB(255, 255, 255)
     btn.Text = ""
@@ -284,72 +302,125 @@ for i, clr in ipairs(paletteColors) do
     end)
 end
 
-local rejoinButton = Instance.new("TextButton")
-rejoinButton.Size = UDim2.new(0.8, 0, 0, 36)
-rejoinButton.Position = UDim2.new(0.18, 0, 0, 32)
-rejoinButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-rejoinButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-rejoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-rejoinButton.Text = "REJOIN SERVER"
-rejoinButton.TextSize, rejoinButton.Font = 11, Enum.Font.Code
-rejoinButton.Parent = Tabs.MISC
+-- MISC Вкладка с прокруткой (без блока DEV внутри)
+local MiscScroll = Instance.new("ScrollingFrame")
+MiscScroll.Size = UDim2.new(0.8, 0, 0, 145)
+MiscScroll.Position = UDim2.new(0.18, 0, 0, 32)
+MiscScroll.BackgroundTransparency = 1
+MiscScroll.BorderSizePixel = 0
+MiscScroll.CanvasSize = UDim2.new(0, 0, 0, 185)
+MiscScroll.ScrollBarThickness = 3
+MiscScroll.Parent = Tabs.MISC
 
-rejoinButton.MouseButton1Click:Connect(function()
-    local ts = TeleportService
-    local p = LocalPlayer
-    pcall(function()
-        ts:TeleportToPlaceInstance(game.PlaceId, game.JobId, p)
-    end)
-end)
-
-local fpsButton = Instance.new("TextButton")
-fpsButton.Size = UDim2.new(0.8, 0, 0, 36)
-fpsButton.Position = UDim2.new(0.18, 0, 0, 74)
-fpsButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-fpsButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-fpsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-fpsButton.Text = "FPS Counter: [OFF]"
-fpsButton.TextSize, fpsButton.Font = 11, Enum.Font.Code
-fpsButton.Parent = Tabs.MISC
-
-local FpsDisplay = Instance.new("TextLabel")
-FpsDisplay.Size = UDim2.new(0, 100, 0, 22)
-FpsDisplay.Position = UDim2.new(0.5, -50, 1, -25)
-FpsDisplay.BackgroundTransparency = 1
-FpsDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
-FpsDisplay.TextStrokeTransparency = 0
-FpsDisplay.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-FpsDisplay.Text = "FPS: 90"
-FpsDisplay.TextSize, FpsDisplay.Font = 12, Enum.Font.Code
-FpsDisplay.Visible = false
-FpsDisplay.Parent = ScreenGui
-
-fpsButton.MouseButton1Click:Connect(function()
-    ScriptConfig.FPS = not ScriptConfig.FPS
-    UpdateButtonState(fpsButton, ScriptConfig.FPS, "FPS Counter:")
-    FpsDisplay.Visible = ScriptConfig.FPS
-end)
-
-local FpsColorContainer = Instance.new("Frame")
-FpsColorContainer.Size = UDim2.new(0.8, 0, 0, 32)
-FpsColorContainer.Position = UDim2.new(0.18, 0, 0, 116)
-FpsColorContainer.BackgroundTransparency = 1
-FpsColorContainer.Parent = Tabs.MISC
-
-for i, clr in ipairs(paletteColors) do
+local function createMiscButton(posY, text)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 28, 0, 28)
-    btn.Position = UDim2.new(0, (i - 1) * 33, 0, 0)
-    btn.BackgroundColor3 = clr
+    btn.Size = UDim2.new(1, -6, 0, 26)
+    btn.Position = UDim2.new(0, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     btn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Text = ""
-    btn.Parent = FpsColorContainer
-    
-    btn.MouseButton1Click:Connect(function()
-        ScriptConfig.FPSColor = clr
-        FpsDisplay.TextColor3 = clr
-    end)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = text
+    btn.TextSize, btn.Font = 10, Enum.Font.Code
+    btn.Parent = MiscScroll
+    return btn
 end
+
+-- 1. REJOIN
+local rejoinButton = createMiscButton(0, "REJOIN")
+rejoinButton.MouseButton1Click:Connect(function()
+    pcall(function()
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+    end)
+end)
+
+-- 2. NO CLIP
+local noclipButton = createMiscButton(30, "NO CLIP [OFF]")
+noclipButton.MouseButton1Click:Connect(function()
+    ScriptConfig.NoClip = not ScriptConfig.NoClip
+    UpdateButtonState(noclipButton, ScriptConfig.NoClip, "NO CLIP")
+end)
+
+-- 3. ANTI AFK
+local afkButton = createMiscButton(60, "ANTI AFK [OFF]")
+afkButton.MouseButton1Click:Connect(function()
+    ScriptConfig.AntiAFK = not ScriptConfig.AntiAFK
+    UpdateButtonState(afkButton, ScriptConfig.AntiAFK, "ANTI AFK")
+end)
+
+-- 4. TP SAFE ZONE
+local safeTpButton = createMiscButton(90, "TP SAFE ZONE")
+safeTpButton.MouseButton1Click:Connect(function()
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = CFrame.new(SafeZonePosition)
+    end
+end)
+
+-- 5. FPS UNLOCKER
+local fpsUnlockButton = createMiscButton(120, "FPS UNLOCKER [OFF]")
+fpsUnlockButton.MouseButton1Click:Connect(function()
+    ScriptConfig.FPSUnlocker = not ScriptConfig.FPSUnlocker
+    UpdateButtonState(fpsUnlockButton, ScriptConfig.FPSUnlocker, "FPS UNLOCKER")
+    if ScriptConfig.FPSUnlocker then
+        pcall(function() setfpscap(144) end)
+    else
+        pcall(function() setfpscap(60) end)
+    end
+end)
+
+-- 6. FPS / PING
+local fpsPingButton = createMiscButton(150, "FPS / PING [OFF]")
+local StatsDisplay = Instance.new("TextLabel")
+StatsDisplay.Size = UDim2.new(0, 120, 0, 40)
+StatsDisplay.Position = UDim2.new(0, 10, 1, -45)
+StatsDisplay.BackgroundTransparency = 1
+StatsDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatsDisplay.TextStrokeTransparency = 0
+StatsDisplay.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+StatsDisplay.TextXAlignment = Enum.TextXAlignment.Left
+StatsDisplay.Text = "FPS: 90\nPING: 30ms"
+StatsDisplay.TextSize, StatsDisplay.Font = 12, Enum.Font.Code
+StatsDisplay.Visible = false
+StatsDisplay.Parent = ScreenGui
+
+fpsPingButton.MouseButton1Click:Connect(function()
+    ScriptConfig.FPS = not ScriptConfig.FPS
+    UpdateButtonState(fpsPingButton, ScriptConfig.FPS, "FPS / PING")
+    StatsDisplay.Visible = ScriptConfig.FPS
+end)
+
+-- 7. РАЗДЕЛ DEV (вынесен наружу, под вкладки внизу меню)
+local DevContainer = Instance.new("TextButton")
+DevContainer.Size = UDim2.new(0.95, 0, 0, 72)
+DevContainer.Position = UDim2.new(0.025, 0, 0, 182)
+DevContainer.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+DevContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
+DevContainer.AutoButtonColor = false
+DevContainer.Text = ""
+DevContainer.Parent = MainFrame
+
+local DevRichLabel = Instance.new("TextLabel")
+DevRichLabel.Size = UDim2.new(1, -4, 1, -4)
+DevRichLabel.Position = UDim2.new(0, 2, 0, 2)
+DevRichLabel.BackgroundTransparency = 1
+DevRichLabel.TextWrapped = true
+DevRichLabel.TextXAlignment = Enum.TextXAlignment.Left
+DevRichLabel.TextYAlignment = Enum.TextYAlignment.Top
+DevRichLabel.RichText = true
+DevRichLabel.Text = '<font color="rgb(50,255,50)">S</font><font color="rgb(255,140,0)">O</font><font color="rgb(50,255,50)">N</font><font color="rgb(50,255,50)">I</font><font color="rgb(50,255,50)">K</font> <font color="rgb(50,255,50)">H</font><font color="rgb(255,140,0)">A</font><font color="rgb(50,255,50)">C</font><font color="rgb(50,255,50)">K</font> <font color="rgb(50,255,50)">S</font><font color="rgb(255,140,0)">C</font><font color="rgb(50,255,50)">R</font><font color="rgb(50,255,50)">I</font><font color="rgb(50,255,50)">P</font><font color="rgb(255,140,0)">T</font> <font color="rgb(50,255,50)">F</font><font color="rgb(255,140,0)">O</font><font color="rgb(50,255,50)">R</font> <font color="rgb(50,255,50)">C</font><font color="rgb(255,140,0)">H</font><font color="rgb(50,255,50)">A</font><font color="rgb(50,255,50)">M</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">L</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">O</font><font color="rgb(255,140,0)">N</font><br/><font color="rgb(50,150,255)">tg @sonik_hack</font><br/><font color="rgb(255,255,255)">Other scripts on </font><font color="rgb(50,150,255)">Telegram </font><font color="rgb(245,222,179)">Channel @dev_sonik</font>'
+DevRichLabel.TextSize, DevRichLabel.Font = 8, Enum.Font.Code
+DevRichLabel.Parent = DevContainer
+
+DevContainer.MouseButton1Click:Connect(function()
+    pcall(function()
+        if setclipboard then setclipboard("https://t.me/dev_sonik") end
+    end)
+    pcall(function()
+        if syn and syn.request then
+            syn.request({Url = "http://127.0.0.1:6463/rpc?v=1", Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = game:GetService("HttpService"):JSONEncode({cmd = "INVITE_BROWSER", args = {code = "dev_sonik"}})})
+        end
+    end)
+end)
 
 ShowTab("AIM")
 
@@ -362,9 +433,25 @@ RunService.RenderStepped:Connect(function(dt)
         frameCount = frameCount + 1
         local currentTick = tick()
         if currentTick - lastFpsUpdate >= 1 then
-            FpsDisplay.Text = "FPS: " .. math.floor(frameCount / (currentTick - lastFpsUpdate))
+            local currentFPS = math.floor(frameCount / (currentTick - lastFpsUpdate))
+            local currentPing = 0
+            pcall(function()
+                currentPing = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            end)
+            StatsDisplay.Text = string.format("FPS: %d\nPING: %dms", currentFPS, currentPing)
             frameCount = 0
             lastFpsUpdate = currentTick
+        end
+    end
+
+    if ScriptConfig.NoClip then
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
         end
     end
 
@@ -441,7 +528,6 @@ local function GetClosestVisibleTarget()
                             rayParams.FilterType = Enum.RaycastFilterType.Exclude
                             local rayResult = Workspace:Raycast(Camera.CFrame.Position, (targetPart.Position - Camera.CFrame.Position), rayParams)
                             
-                            -- Если нет преград ИЛИ преграда тонкая (например ваза/мелкий объект), пропускаем хит
                             if not rayResult or (rayResult.Instance and rayResult.Instance.Transparency > 0.5) or (rayResult.Instance and rayResult.Instance.Size.Magnitude < 3) then
                                 shortestDist = dist
                                 closestTarget = targetPart
