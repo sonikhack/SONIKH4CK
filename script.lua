@@ -2,7 +2,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
 
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
@@ -11,7 +10,6 @@ local Camera = Workspace.CurrentCamera
 getgenv().ScriptConfig = {
     ESP = false,
     ESPColor = Color3.fromRGB(255, 50, 50),
-    WallHack = false,
     Aimbot = false,
     FOVSize = 100
 }
@@ -34,11 +32,12 @@ FOVCircle.Filled = false
 
 -- Main Frame (Черный дизайн)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 225)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -112)
+MainFrame.Size = UDim2.new(0, 320, 0, 185)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -92)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BorderSizePixel = 1
+MainFieldActive = true
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
@@ -53,7 +52,10 @@ Title.TextSize = 15
 Title.Font = Enum.Font.Code
 Title.Parent = MainFrame
 
--- Minimize Button [ SH¿ ] (Скрывает ВСЁ меню вместе с полоской)
+-- Список всех элементов интерфейса (кроме самой кнопки скрытия), чтобы управлять их видимостью
+local menuElements = {}
+
+-- Minimize Button [ SH¿ ] (Скрывает и показывает ВСЁ меню целиком)
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Size = UDim2.new(0, 40, 0, 35)
 MinimizeButton.Position = UDim2.new(1, -40, 0, 0)
@@ -65,15 +67,18 @@ MinimizeButton.TextSize = 11
 MinimizeButton.Font = Enum.Font.Code
 MinimizeButton.Parent = MainFrame
 
-local isMinimized = false
+local isHidden = false
 MinimizeButton.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    for _, child in ipairs(MainFrame:GetChildren()) do
-        child.Visible = isMinimized
+    isHidden = not isHidden
+    
+    -- Скрываем/показываем фон и рамку главного окна
+    MainFrame.BackgroundTransparency = isHidden and 1 or 0
+    MainFrame.BorderSizePixel = isHidden and 0 or 1
+    
+    -- Скрываем/показываем все остальные элементы
+    for _, element in ipairs(menuElements) do
+        element.Visible = not isHidden
     end
-    MinimizeButton.Visible = true
-    MainFrame.BackgroundTransparency = isMinimized and 1 or 0
-    MainFrame.BorderSizePixel = isMinimized and 0 or 1
 end)
 
 -- 1. ESP TOGGLE
@@ -86,6 +91,7 @@ espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 espButton.Text = "ESP Players: [OFF]"
 espButton.TextSize, espButton.Font = 12, Enum.Font.Code
 espButton.Parent = MainFrame
+table.insert(menuElements, espButton)
 
 espButton.MouseButton1Click:Connect(function()
     ScriptConfig.ESP = not ScriptConfig.ESP
@@ -105,6 +111,7 @@ ColorContainer.Size = UDim2.new(0.9, 0, 0, 32)
 ColorContainer.Position = UDim2.new(0.05, 0, 0, 80)
 ColorContainer.BackgroundTransparency = 1
 ColorContainer.Parent = MainFrame
+table.insert(menuElements, ColorContainer)
 
 local colors = {
     {Color3.fromRGB(255, 50, 50)},   -- Красный
@@ -127,32 +134,19 @@ for i, clrData in ipairs(colors) do
     end)
 end
 
--- 3. WALL HACK
-local whButton = Instance.new("TextButton")
-whButton.Size = UDim2.new(0.9, 0, 0, 32)
-whButton.Position = UDim2.new(0.05, 0, 0, 118)
-whButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-whButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-whButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-whButton.Text = "WallHack: [OFF]"
-whButton.TextSize, whButton.Font = 12, Enum.Font.Code
-whButton.Parent = MainFrame
-
-whButton.MouseButton1Click:Connect(function()
-    ScriptConfig.WallHack = not ScriptConfig.WallHack
-    whButton.Text = "WallHack: " .. (ScriptConfig.WallHack and "[ON]" or "[OFF]")
-end)
-
--- 4. AIMBOT (Silent)
+-- 3. AIMBOT (Silent)
 local aimButton = Instance.new("TextButton")
 aimButton.Size = UDim2.new(0.9, 0, 0, 32)
-aimButton.Position = UDim2.new(0.05, 0, 0, 156)
+aimButton.Position = UDim2.new(0.05, 0, 0, 118)
 aimButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 aimButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 aimButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 aimButton.Text = "Aimbot (Silent): [OFF]"
 aimButton.TextSize, aimButton.Font = 12, Enum.Font.Code
 aimButton.Parent = MainFrame
+table.insert(menuElements, aimButton)
+
+table.insert(menuElements, Title)
 
 aimButton.MouseButton1Click:Connect(function()
     ScriptConfig.Aimbot = not ScriptConfig.Aimbot
@@ -160,7 +154,7 @@ aimButton.MouseButton1Click:Connect(function()
     FOVCircle.Visible = ScriptConfig.Aimbot
 end)
 
--- ESP Loop
+-- ESP Loop (Убран контур/OutlineColor, добавлена максимальная яркость FillTransparency для видимости вдалеке)
 RunService.RenderStepped:Connect(function()
     if ScriptConfig.ESP then
         for _, player in ipairs(Players:GetPlayers()) do
@@ -170,22 +164,11 @@ RunService.RenderStepped:Connect(function()
                     highlight = Instance.new("Highlight")
                     highlight.Name = "SonikESP"
                     highlight.Adornee = player.Character
-                    highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+                    highlight.OutlineTransparency = 1 -- Полностью убираем черный контур
                     highlight.Parent = player.Character
                 end
                 highlight.FillColor = ScriptConfig.ESPColor
-            end
-        end
-    end
-end)
-
--- WallHack Loop
-RunService.Stepped:Connect(function()
-    local character = LocalPlayer.Character
-    if character and ScriptConfig.WallHack then
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
+                highlight.FillTransparency = 0.2 -- Делаем цвет ярче и заметнее на расстоянии
             end
         end
     end
