@@ -11,7 +11,10 @@ local Camera = Workspace.CurrentCamera
 
 getgenv().ScriptConfig = {
     Aimbot = false,
-    ESP = false,
+    CheckVisible = false,
+    Chams = false,
+    ChamsOutline = true,
+    BoxESP = false,
     ESPLine = false,
     ESPColor = Color3.fromRGB(255, 50, 50),
     FPS = false,
@@ -65,9 +68,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 28)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(0, 0, 0)
-Title.TextStrokeTransparency = 0
-Title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Text = "SONIK HACK"
 Title.TextSize, Title.Font = 12, Enum.Font.Code
 Title.Parent = MainFrame
@@ -211,13 +212,13 @@ local function UpdateButtonState(btn, state, text)
 end
 
 local aimbotButton = Instance.new("TextButton")
-aimbotButton.Size = UDim2.new(0.8, 0, 0, 32)
+aimbotButton.Size = UDim2.new(0.8, 0, 0, 28)
 aimbotButton.Position = UDim2.new(0.18, 0, 0, 32)
 aimbotButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 aimbotButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 aimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 aimbotButton.Text = "AIMBOT: [OFF]"
-aimbotButton.TextSize, aimbotButton.Font = 11, Enum.Font.Code
+aimbotButton.TextSize, aimbotButton.Font = 10, Enum.Font.Code
 aimbotButton.Parent = Tabs.AIM
 
 local aimCorner = Instance.new("UICorner")
@@ -237,14 +238,33 @@ WaterKeyButton.MouseButton1Click:Connect(function()
     ToggleAimbot()
 end)
 
+local checkVisibleButton = Instance.new("TextButton")
+checkVisibleButton.Size = UDim2.new(0.8, 0, 0, 28)
+checkVisibleButton.Position = UDim2.new(0.18, 0, 0, 62)
+checkVisibleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+checkVisibleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+checkVisibleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+checkVisibleButton.Text = "CHECK VISIBLE: [OFF]"
+checkVisibleButton.TextSize, checkVisibleButton.Font = 10, Enum.Font.Code
+checkVisibleButton.Parent = Tabs.AIM
+
+local checkVisibleCorner = Instance.new("UICorner")
+checkVisibleCorner.CornerRadius = UDim.new(0, 6)
+checkVisibleCorner.Parent = checkVisibleButton
+
+checkVisibleButton.MouseButton1Click:Connect(function()
+    ScriptConfig.CheckVisible = not ScriptConfig.CheckVisible
+    UpdateButtonState(checkVisibleButton, ScriptConfig.CheckVisible, "CHECK VISIBLE:")
+end)
+
 local waterKeyMenuButton = Instance.new("TextButton")
-waterKeyMenuButton.Size = UDim2.new(0.8, 0, 0, 32)
-waterKeyMenuButton.Position = UDim2.new(0.18, 0, 0, 68)
+waterKeyMenuButton.Size = UDim2.new(0.8, 0, 0, 28)
+waterKeyMenuButton.Position = UDim2.new(0.18, 0, 0, 92)
 waterKeyMenuButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 waterKeyMenuButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 waterKeyMenuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 waterKeyMenuButton.Text = "WATER KEY: [OFF]"
-waterKeyMenuButton.TextSize, waterKeyMenuButton.Font = 11, Enum.Font.Code
+waterKeyMenuButton.TextSize, waterKeyMenuButton.Font = 10, Enum.Font.Code
 waterKeyMenuButton.Parent = Tabs.AIM
 
 local waterKeyCorner = Instance.new("UICorner")
@@ -258,8 +278,8 @@ waterKeyMenuButton.MouseButton1Click:Connect(function()
 end)
 
 local FovContainer = Instance.new("Frame")
-FovContainer.Size = UDim2.new(0.8, 0, 0, 42)
-FovContainer.Position = UDim2.new(0.18, 0, 0, 104)
+FovContainer.Size = UDim2.new(0.8, 0, 0, 36)
+FovContainer.Position = UDim2.new(0.18, 0, 0, 122)
 FovContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 FovContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
 FovContainer.Parent = Tabs.AIM
@@ -269,24 +289,24 @@ fovCorner.CornerRadius = UDim.new(0, 6)
 fovCorner.Parent = FovContainer
 
 local FovLabel = Instance.new("TextLabel")
-FovLabel.Size = UDim2.new(1, 0, 0, 18)
+FovLabel.Size = UDim2.new(1, 0, 0, 16)
 FovLabel.Position = UDim2.new(0, 0, 0, 2)
 FovLabel.BackgroundTransparency = 1
 FovLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 FovLabel.Text = "FOV Size: 45"
-FovLabel.TextSize, FovLabel.Font = 10, Enum.Font.Code
+FovLabel.TextSize, FovLabel.Font = 9, Enum.Font.Code
 FovLabel.Parent = FovContainer
 
 local SliderBar = Instance.new("Frame")
 SliderBar.Size = UDim2.new(0.8, 0, 0, 3)
-SliderBar.Position = UDim2.new(0.1, 0, 0, 26)
+SliderBar.Position = UDim2.new(0.1, 0, 0, 24)
 SliderBar.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 SliderBar.BorderSizePixel = 0
 SliderBar.Parent = FovContainer
 
 local SliderButton = Instance.new("TextButton")
-SliderButton.Size = UDim2.new(0, 12, 0, 12)
-SliderButton.Position = UDim2.new(0, -6, 0.5, -6)
+SliderButton.Size = UDim2.new(0, 10, 0, 10)
+SliderButton.Position = UDim2.new(0, -5, 0.5, -5)
 SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SliderButton.Text = ""
@@ -306,31 +326,45 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local relativeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-        SliderButton.Position = UDim2.new(relativeX, -6, 0.5, -6)
+        SliderButton.Position = UDim2.new(relativeX, -5, 0.5, -5)
         local calculatedFOV = math.floor(45 + (relativeX * (360 - 45)))
         ScriptConfig.FOVSize = calculatedFOV
         FovLabel.Text = "FOV Size: " .. calculatedFOV
     end
 end)
 
-local espButton = Instance.new("TextButton")
-espButton.Size = UDim2.new(0.8, 0, 0, 32)
-espButton.Position = UDim2.new(0.18, 0, 0, 32)
-espButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-espButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-espButton.Text = "ESP Players: [OFF]"
-espButton.TextSize, espButton.Font = 11, Enum.Font.Code
-espButton.Parent = Tabs.ESP
+local EspScroll = Instance.new("ScrollingFrame")
+EspScroll.Size = UDim2.new(0.8, 0, 0, 145)
+EspScroll.Position = UDim2.new(0.18, 0, 0, 32)
+EspScroll.BackgroundTransparency = 1
+EspScroll.BorderSizePixel = 0
+EspScroll.CanvasSize = UDim2.new(0, 0, 0, 175)
+EspScroll.ScrollBarThickness = 3
+EspScroll.Parent = Tabs.ESP
 
-local espCorner = Instance.new("UICorner")
-espCorner.CornerRadius = UDim.new(0, 6)
-espCorner.Parent = espButton
+local function createEspButton(posY, text)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -6, 0, 26)
+    btn.Position = UDim2.new(0, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    btn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = text
+    btn.TextSize, btn.Font = 10, Enum.Font.Code
+    btn.Parent = EspScroll
+    
+    local eCorner = Instance.new("UICorner")
+    eCorner.CornerRadius = UDim.new(0, 6)
+    eCorner.Parent = btn
+    
+    return btn
+end
 
-espButton.MouseButton1Click:Connect(function()
-    ScriptConfig.ESP = not ScriptConfig.ESP
-    UpdateButtonState(espButton, ScriptConfig.ESP, "ESP Players:")
-    if not ScriptConfig.ESP then
+local chamsButton = createEspButton(0, "CHAMS: [OFF]")
+chamsButton.MouseButton1Click:Connect(function()
+    ScriptConfig.Chams = not ScriptConfig.Chams
+    UpdateButtonState(chamsButton, ScriptConfig.Chams, "CHAMS:")
+    if not ScriptConfig.Chams then
         for _, player in ipairs(Players:GetPlayers()) do
             if player.Character and player.Character:FindFirstChild("SonikESP") then
                 player.Character.SonikESP:Destroy()
@@ -339,30 +373,36 @@ espButton.MouseButton1Click:Connect(function()
     end
 end)
 
-local lineButton = Instance.new("TextButton")
-lineButton.Size = UDim2.new(0.8, 0, 0, 32)
-lineButton.Position = UDim2.new(0.18, 0, 0, 68)
-lineButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-lineButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-lineButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-lineButton.Text = "LINE: [OFF]"
-lineButton.TextSize, lineButton.Font = 11, Enum.Font.Code
-lineButton.Parent = Tabs.ESP
+local outlineButton = createEspButton(30, "OUTLINE: [ON]")
+outlineButton.MouseButton1Click:Connect(function()
+    ScriptConfig.ChamsOutline = not ScriptConfig.ChamsOutline
+    UpdateButtonState(outlineButton, ScriptConfig.ChamsOutline, "OUTLINE:")
+end)
 
-local lineCorner = Instance.new("UICorner")
-lineCorner.CornerRadius = UDim.new(0, 6)
-lineCorner.Parent = lineButton
+local boxButton = createEspButton(60, "BOX: [OFF]")
+boxButton.MouseButton1Click:Connect(function()
+    ScriptConfig.BoxESP = not ScriptConfig.BoxESP
+    UpdateButtonState(boxButton, ScriptConfig.BoxESP, "BOX:")
+    if not ScriptConfig.BoxESP then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("SonikBox") then
+                player.Character.SonikBox:Remove()
+            end
+        end
+    end
+end)
 
+local lineButton = createEspButton(90, "LINE: [OFF]")
 lineButton.MouseButton1Click:Connect(function()
     ScriptConfig.ESPLine = not ScriptConfig.ESPLine
     UpdateButtonState(lineButton, ScriptConfig.ESPLine, "LINE:")
 end)
 
 local ColorContainer = Instance.new("Frame")
-ColorContainer.Size = UDim2.new(0.8, 0, 0, 28)
-ColorContainer.Position = UDim2.new(0.18, 0, 0, 104)
+ColorContainer.Size = UDim2.new(1, -6, 0, 24)
+ColorContainer.Position = UDim2.new(0, 0, 0, 120)
 ColorContainer.BackgroundTransparency = 1
-ColorContainer.Parent = Tabs.ESP
+ColorContainer.Parent = EspScroll
 
 local paletteColors = {
     Color3.fromRGB(255, 50, 50),
@@ -375,8 +415,8 @@ local paletteColors = {
 
 for i, clr in ipairs(paletteColors) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 24, 0, 24)
-    btn.Position = UDim2.new(0, (i - 1) * 29, 0, 0)
+    btn.Size = UDim2.new(0, 22, 0, 24)
+    btn.Position = UDim2.new(0, (i - 1) * 26, 0, 0)
     btn.BackgroundColor3 = clr
     btn.BorderColor3 = Color3.fromRGB(255, 255, 255)
     btn.Text = ""
@@ -462,8 +502,6 @@ StatsDisplay.Size = UDim2.new(0, 120, 0, 40)
 StatsDisplay.Position = UDim2.new(0, 10, 1, -45)
 StatsDisplay.BackgroundTransparency = 1
 StatsDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
-StatsDisplay.TextStrokeTransparency = 0
-StatsDisplay.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 StatsDisplay.TextXAlignment = Enum.TextXAlignment.Left
 StatsDisplay.Text = "FPS: 90\nPING: 30ms"
 StatsDisplay.TextSize, StatsDisplay.Font = 12, Enum.Font.Code
@@ -498,16 +536,34 @@ DevRichLabel.TextWrapped = true
 DevRichLabel.TextXAlignment = Enum.TextXAlignment.Left
 DevRichLabel.TextYAlignment = Enum.TextYAlignment.Top
 DevRichLabel.RichText = true
--- Исправлены цвета слов SONIK HACK FOR на чистый белый цвет
-DevRichLabel.Text = '<font color="rgb(255,255,255)">SONIK HACK FOR </font><font color="rgb(255,255,255)">CHAMELEON</font><br/><font color="rgb(200,200,200)">tg</font> @sonik_hack<br/><font color="rgb(200,200,200)">Other scripts on Telegram Channel @dev_sonik</font>'
+-- Исправлены цвета во вкладке DEV: все белым, а синий код цвета идет строго перед 'tg' и 'Telegram'
+DevRichLabel.Text = '<font color="rgb(255,255,255)">SONIK HACK FOR CHAMELEON</font><br/><font color="rgb(50,100,255)">tg</font><font color="rgb(255,255,255)"> @sonik_hack</font><br/><font color="rgb(255,255,255)">Other scripts on </font><font color="rgb(50,100,255)">Telegram</font><font color="rgb(255,255,255)"> Channel @dev_sonik</font>'
 DevRichLabel.TextSize, DevRichLabel.Font = 8, Enum.Font.Code
 DevRichLabel.Parent = DevContainer
 
 ShowTab("AIM")
 
 local activeLines = {}
+local activeBoxes = {}
 local lastFpsUpdate = 0
 local frameCount = 0
+
+local function IsVisible(targetPart)
+    if not ScriptConfig.CheckVisible then return true end
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin)
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = RaycastParams.FilterType.Exclude
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.IgnoreWater = true
+    
+    local result = Workspace:Raycast(origin, direction, raycastParams)
+    if result then
+        local hitInstance = result.Instance
+        return hitInstance:IsDescendantOf(targetPart.Parent)
+    end
+    return true
+end
 
 local function GetClosestTarget()
     local closestTarget = nil
@@ -519,7 +575,7 @@ local function GetClosestTarget()
             local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
             if humanoid and humanoid.Health > 0 then
                 local targetPart = player.Character:FindFirstChild("HumanoidRootPart") or player.Character:FindFirstChild("Head")
-                if targetPart then
+                if targetPart and IsVisible(targetPart) then
                     local screenPoint, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
                     if onScreen then
                         local dist = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
@@ -551,7 +607,7 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
 
-    if ScriptConfig.ESP then
+    if ScriptConfig.Chams then
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character then
                 local highlight = player.Character:FindFirstChild("SonikESP")
@@ -564,8 +620,40 @@ RunService.RenderStepped:Connect(function(dt)
                 highlight.FillColor = ScriptConfig.ESPColor
                 highlight.FillTransparency = 0.3
                 highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                highlight.OutlineTransparency = 0
+                highlight.OutlineTransparency = ScriptConfig.ChamsOutline and 0 or 1
             end
+        end
+    end
+    
+    if ScriptConfig.BoxESP then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                local box = activeBoxes[player]
+                if not box then
+                    box = Drawing.new("Square")
+                    box.Thickness = 1.5
+                    box.Filled = false
+                    activeBoxes[player] = box
+                end
+                if hrp then
+                    local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+                    if onScreen then
+                        box.Visible = true
+                        box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z)
+                        box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2)
+                        box.Color = ScriptConfig.ESPColor
+                    else
+                        box.Visible = false
+                    end
+                else
+                    box.Visible = false
+                end
+            end
+        end
+    else
+        for _, box in pairs(activeBoxes) do
+            box.Visible = false
         end
     end
     
