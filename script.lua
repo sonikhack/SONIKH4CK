@@ -11,7 +11,6 @@ local Camera = Workspace.CurrentCamera
 
 getgenv().ScriptConfig = {
     Aimbot = false,
-    CheckVisible = false,
     Chams = false,
     ChamsOutline = true,
     BoxESP = false,
@@ -212,13 +211,13 @@ local function UpdateButtonState(btn, state, text)
 end
 
 local aimbotButton = Instance.new("TextButton")
-aimbotButton.Size = UDim2.new(0.8, 0, 0, 28)
+aimbotButton.Size = UDim2.new(0.8, 0, 0, 32)
 aimbotButton.Position = UDim2.new(0.18, 0, 0, 32)
 aimbotButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 aimbotButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 aimbotButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 aimbotButton.Text = "AIMBOT: [OFF]"
-aimbotButton.TextSize, aimbotButton.Font = 10, Enum.Font.Code
+aimbotButton.TextSize, aimbotButton.Font = 11, Enum.Font.Code
 aimbotButton.Parent = Tabs.AIM
 
 local aimCorner = Instance.new("UICorner")
@@ -238,33 +237,14 @@ WaterKeyButton.MouseButton1Click:Connect(function()
     ToggleAimbot()
 end)
 
-local checkVisibleButton = Instance.new("TextButton")
-checkVisibleButton.Size = UDim2.new(0.8, 0, 0, 28)
-checkVisibleButton.Position = UDim2.new(0.18, 0, 0, 62)
-checkVisibleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-checkVisibleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-checkVisibleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-checkVisibleButton.Text = "CHECK VISIBLE: [OFF]"
-checkVisibleButton.TextSize, checkVisibleButton.Font = 10, Enum.Font.Code
-checkVisibleButton.Parent = Tabs.AIM
-
-local checkVisibleCorner = Instance.new("UICorner")
-checkVisibleCorner.CornerRadius = UDim.new(0, 6)
-checkVisibleCorner.Parent = checkVisibleButton
-
-checkVisibleButton.MouseButton1Click:Connect(function()
-    ScriptConfig.CheckVisible = not ScriptConfig.CheckVisible
-    UpdateButtonState(checkVisibleButton, ScriptConfig.CheckVisible, "CHECK VISIBLE:")
-end)
-
 local waterKeyMenuButton = Instance.new("TextButton")
-waterKeyMenuButton.Size = UDim2.new(0.8, 0, 0, 28)
-waterKeyMenuButton.Position = UDim2.new(0.18, 0, 0, 92)
+waterKeyMenuButton.Size = UDim2.new(0.8, 0, 0, 32)
+waterKeyMenuButton.Position = UDim2.new(0.18, 0, 0, 68)
 waterKeyMenuButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 waterKeyMenuButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 waterKeyMenuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 waterKeyMenuButton.Text = "WATER KEY: [OFF]"
-waterKeyMenuButton.TextSize, waterKeyMenuButton.Font = 10, Enum.Font.Code
+waterKeyMenuButton.TextSize, waterKeyMenuButton.Font = 11, Enum.Font.Code
 waterKeyMenuButton.Parent = Tabs.AIM
 
 local waterKeyCorner = Instance.new("UICorner")
@@ -278,8 +258,8 @@ waterKeyMenuButton.MouseButton1Click:Connect(function()
 end)
 
 local FovContainer = Instance.new("Frame")
-FovContainer.Size = UDim2.new(0.8, 0, 0, 36)
-FovContainer.Position = UDim2.new(0.18, 0, 0, 122)
+FovContainer.Size = UDim2.new(0.8, 0, 0, 42)
+FovContainer.Position = UDim2.new(0.18, 0, 0, 104)
 FovContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 FovContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
 FovContainer.Parent = Tabs.AIM
@@ -289,24 +269,24 @@ fovCorner.CornerRadius = UDim.new(0, 6)
 fovCorner.Parent = FovContainer
 
 local FovLabel = Instance.new("TextLabel")
-FovLabel.Size = UDim2.new(1, 0, 0, 16)
+FovLabel.Size = UDim2.new(1, 0, 0, 18)
 FovLabel.Position = UDim2.new(0, 0, 0, 2)
 FovLabel.BackgroundTransparency = 1
 FovLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 FovLabel.Text = "FOV Size: 45"
-FovLabel.TextSize, FovLabel.Font = 9, Enum.Font.Code
+FovLabel.TextSize, FovLabel.Font = 10, Enum.Font.Code
 FovLabel.Parent = FovContainer
 
 local SliderBar = Instance.new("Frame")
 SliderBar.Size = UDim2.new(0.8, 0, 0, 3)
-SliderBar.Position = UDim2.new(0.1, 0, 0, 24)
+SliderBar.Position = UDim2.new(0.1, 0, 0, 26)
 SliderBar.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 SliderBar.BorderSizePixel = 0
 SliderBar.Parent = FovContainer
 
 local SliderButton = Instance.new("TextButton")
-SliderButton.Size = UDim2.new(0, 10, 0, 10)
-SliderButton.Position = UDim2.new(0, -5, 0.5, -5)
+SliderButton.Size = UDim2.new(0, 12, 0, 12)
+SliderButton.Position = UDim2.new(0, -6, 0.5, -6)
 SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SliderButton.Text = ""
@@ -326,7 +306,7 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local relativeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-        SliderButton.Position = UDim2.new(relativeX, -5, 0.5, -5)
+        SliderButton.Position = UDim2.new(relativeX, -6, 0.5, -6)
         local calculatedFOV = math.floor(45 + (relativeX * (360 - 45)))
         ScriptConfig.FOVSize = calculatedFOV
         FovLabel.Text = "FOV Size: " .. calculatedFOV
@@ -536,7 +516,6 @@ DevRichLabel.TextWrapped = true
 DevRichLabel.TextXAlignment = Enum.TextXAlignment.Left
 DevRichLabel.TextYAlignment = Enum.TextYAlignment.Top
 DevRichLabel.RichText = true
--- Исправлены цвета во вкладке DEV: все белым, а синий код цвета идет строго перед 'tg' и 'Telegram'
 DevRichLabel.Text = '<font color="rgb(255,255,255)">SONIK HACK FOR CHAMELEON</font><br/><font color="rgb(50,100,255)">tg</font><font color="rgb(255,255,255)"> @sonik_hack</font><br/><font color="rgb(255,255,255)">Other scripts on </font><font color="rgb(50,100,255)">Telegram</font><font color="rgb(255,255,255)"> Channel @dev_sonik</font>'
 DevRichLabel.TextSize, DevRichLabel.Font = 8, Enum.Font.Code
 DevRichLabel.Parent = DevContainer
@@ -549,18 +528,16 @@ local lastFpsUpdate = 0
 local frameCount = 0
 
 local function IsVisible(targetPart)
-    if not ScriptConfig.CheckVisible then return true end
     local origin = Camera.CFrame.Position
     local direction = (targetPart.Position - origin)
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = RaycastParams.FilterType.Exclude
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetPart.Parent}
     raycastParams.IgnoreWater = true
     
     local result = Workspace:Raycast(origin, direction, raycastParams)
     if result then
-        local hitInstance = result.Instance
-        return hitInstance:IsDescendantOf(targetPart.Parent)
+        return false
     end
     return true
 end
