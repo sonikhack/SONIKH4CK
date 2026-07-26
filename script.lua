@@ -5,7 +5,6 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
 local Stats = game:GetService("Stats")
-local MarketPlaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
@@ -19,7 +18,10 @@ getgenv().ScriptConfig = {
     FPSUnlocker = false,
     NoClip = false,
     AntiAFK = false,
-    FOVSize = 45
+    FOVSize = 45,
+    FlyUp = false,
+    FlyDown = false,
+    FlySpeed = 50
 }
 
 local SafeZonePosition = Vector3.new(436.69, 156.07, -154.02)
@@ -47,10 +49,9 @@ FOVCircle.NumSides = 64
 FOVCircle.Radius = ScriptConfig.FOVSize
 FOVCircle.Filled = false
 
--- Общая рамка меню с учетом блока DEV внизу
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 280, 0, 235)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -117)
+MainFrame.Size = UDim2.new(0, 280, 0, 185)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -92)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
 MainFrame.BorderSizePixel = 1
@@ -75,7 +76,7 @@ ToggleGui.Parent = game.CoreGui
 
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Size = UDim2.new(0, 42, 0, 42)
-MinimizeButton.Position = UDim2.new(0.5, 110, 0.5, -117)
+MinimizeButton.Position = UDim2.new(0.5, 110, 0.5, -92)
 MinimizeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MinimizeButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 MinimizeButton.BorderSizePixel = 1
@@ -100,8 +101,8 @@ local function AnimateMenu(open)
         MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         
         local tw = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 280, 0, 235),
-            Position = UDim2.new(0.5, -140, 0.5, -117)
+            Size = UDim2.new(0, 280, 0, 185),
+            Position = UDim2.new(0.5, -140, 0.5, -92)
         })
         tw:Play()
         tw.Completed:Wait()
@@ -126,7 +127,8 @@ end)
 local Tabs = {
     AIM = Instance.new("Folder"),
     ESP = Instance.new("Folder"),
-    MISC = Instance.new("Folder")
+    MISC = Instance.new("Folder"),
+    DEV = Instance.new("Folder")
 }
 
 for _, tab in pairs(Tabs) do
@@ -147,16 +149,16 @@ TabContainer.Position = UDim2.new(0, 6, 0, 32)
 TabContainer.BackgroundTransparency = 1
 TabContainer.Parent = MainFrame
 
-local tabNames = {"AIM", "ESP", "MISC"}
+local tabNames = {"AIM", "ESP", "MISC", "DEV"}
 for i, tName in ipairs(tabNames) do
     local tBtn = Instance.new("TextButton")
-    tBtn.Size = UDim2.new(0, 30, 0, 46)
-    tBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 50)
+    tBtn.Size = UDim2.new(0, 30, 0, 33)
+    tBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 37)
     tBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     tBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
     tBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     tBtn.Text = tName
-    tBtn.TextSize = 9
+    tBtn.TextSize = 8
     tBtn.Font = Enum.Font.Code
     tBtn.Parent = TabContainer
     
@@ -302,7 +304,51 @@ for i, clr in ipairs(paletteColors) do
     end)
 end
 
--- MISC Вкладка с прокруткой (без блока DEV внутри)
+-- Отдельное мини-меню полета для No Clip (Up / Down)
+local FlyMiniGui = Instance.new("ScreenGui")
+FlyMiniGui.Name = "SonikFlyMini"
+FlyMiniGui.ResetOnSpawn = false
+FlyMiniGui.Enabled = false
+FlyMiniGui.Parent = game.CoreGui
+
+local FlyFrame = Instance.new("Frame")
+FlyFrame.Size = UDim2.new(0, 120, 0, 55)
+FlyFrame.Position = UDim2.new(0.5, -60, 0.8, 0)
+FlyFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+FlyFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+FlyFrame.BorderSizePixel = 1
+FlyFrame.Active = true
+FlyFrame.Draggable = true
+FlyFrame.Parent = FlyMiniGui
+
+local btnUp = Instance.new("TextButton")
+btnUp.Size = UDim2.new(0.5, -4, 1, -6)
+btnUp.Position = UDim2.new(0, 2, 0, 3)
+btnUp.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+btnUp.BorderColor3 = Color3.fromRGB(255, 255, 255)
+btnUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnUp.Text = "UP"
+btnUp.TextSize = 11
+btnUp.Font = Enum.Font.Code
+btnUp.Parent = FlyFrame
+
+local btnDown = Instance.new("TextButton")
+btnDown.Size = UDim2.new(0.5, -4, 1, -6)
+btnDown.Position = UDim2.new(0.5, 2, 0, 3)
+btnDown.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+btnDown.BorderColor3 = Color3.fromRGB(255, 255, 255)
+btnDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnDown.Text = "DOWN"
+btnDown.TextSize = 11
+btnDown.Font = Enum.Font.Code
+btnDown.Parent = FlyFrame
+
+btnUp.MouseButton1Down:Connect(function() ScriptConfig.FlyUp = true end)
+btnUp.MouseButton1Up:Connect(function() ScriptConfig.FlyUp = false end)
+btnDown.MouseButton1Down:Connect(function() ScriptConfig.FlyDown = true end)
+btnDown.MouseButton1Up:Connect(function() ScriptConfig.FlyDown = false end)
+
+-- MISC Вкладка с прокруткой
 local MiscScroll = Instance.new("ScrollingFrame")
 MiscScroll.Size = UDim2.new(0.8, 0, 0, 145)
 MiscScroll.Position = UDim2.new(0.18, 0, 0, 32)
@@ -333,11 +379,12 @@ rejoinButton.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 2. NO CLIP
+-- 2. NO CLIP (+ отдельное меню полета и обход анти-чита Chameleon)
 local noclipButton = createMiscButton(30, "NO CLIP [OFF]")
 noclipButton.MouseButton1Click:Connect(function()
     ScriptConfig.NoClip = not ScriptConfig.NoClip
     UpdateButtonState(noclipButton, ScriptConfig.NoClip, "NO CLIP")
+    FlyMiniGui.Enabled = ScriptConfig.NoClip
 end)
 
 -- 3. ANTI AFK
@@ -389,25 +436,27 @@ fpsPingButton.MouseButton1Click:Connect(function()
     StatsDisplay.Visible = ScriptConfig.FPS
 end)
 
--- 7. РАЗДЕЛ DEV (вынесен наружу, под вкладки внизу меню)
+-- DEV Вкладка (с точным оформлением каждого слова и открытием ссылки в браузере)
 local DevContainer = Instance.new("TextButton")
-DevContainer.Size = UDim2.new(0.95, 0, 0, 72)
-DevContainer.Position = UDim2.new(0.025, 0, 0, 182)
-DevContainer.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+DevContainer.Size = UDim2.new(0.8, 0, 0, 75)
+DevContainer.Position = UDim2.new(0.18, 0, 0, 32)
+DevContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 DevContainer.BorderColor3 = Color3.fromRGB(255, 255, 255)
 DevContainer.AutoButtonColor = false
 DevContainer.Text = ""
-DevContainer.Parent = MainFrame
+DevContainer.Visible = false
+DevContainer.Parent = Tabs.DEV
 
 local DevRichLabel = Instance.new("TextLabel")
-DevRichLabel.Size = UDim2.new(1, -4, 1, -4)
-DevRichLabel.Position = UDim2.new(0, 2, 0, 2)
+DevRichLabel.Size = UDim2.new(1, -6, 1, -4)
+DevRichLabel.Position = UDim2.new(0, 3, 0, 2)
 DevRichLabel.BackgroundTransparency = 1
 DevRichLabel.TextWrapped = true
 DevRichLabel.TextXAlignment = Enum.TextXAlignment.Left
 DevRichLabel.TextYAlignment = Enum.TextYAlignment.Top
 DevRichLabel.RichText = true
-DevRichLabel.Text = '<font color="rgb(50,255,50)">S</font><font color="rgb(255,140,0)">O</font><font color="rgb(50,255,50)">N</font><font color="rgb(50,255,50)">I</font><font color="rgb(50,255,50)">K</font> <font color="rgb(50,255,50)">H</font><font color="rgb(255,140,0)">A</font><font color="rgb(50,255,50)">C</font><font color="rgb(50,255,50)">K</font> <font color="rgb(50,255,50)">S</font><font color="rgb(255,140,0)">C</font><font color="rgb(50,255,50)">R</font><font color="rgb(50,255,50)">I</font><font color="rgb(50,255,50)">P</font><font color="rgb(255,140,0)">T</font> <font color="rgb(50,255,50)">F</font><font color="rgb(255,140,0)">O</font><font color="rgb(50,255,50)">R</font> <font color="rgb(50,255,50)">C</font><font color="rgb(255,140,0)">H</font><font color="rgb(50,255,50)">A</font><font color="rgb(50,255,50)">M</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">L</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">O</font><font color="rgb(255,140,0)">N</font><br/><font color="rgb(50,150,255)">tg @sonik_hack</font><br/><font color="rgb(255,255,255)">Other scripts on </font><font color="rgb(50,150,255)">Telegram </font><font color="rgb(245,222,179)">Channel @dev_sonik</font>'
+-- Точная покраска по твоим правилам: гласные/согласные только у CHAMELEON, раздельные цвета для tg, Telegram, Channel и сброс на белые
+DevRichLabel.Text = 'SONIK HACK SCRIPT FOR <font color="rgb(50,255,50)">C</font><font color="rgb(255,140,0)">H</font><font color="rgb(50,255,50)">A</font><font color="rgb(50,255,50)">M</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">L</font><font color="rgb(50,255,50)">E</font><font color="rgb(50,255,50)">O</font><font color="rgb(255,140,0)">N</font><font color="rgb(255,255,255)"><br/><font color="rgb(0,136,204)">tg</font> @sonik_hack<br/>Other scripts on <font color="rgb(0,136,204)">Telegram</font> <font color="rgb(245,222,179)">Channel</font> @dev_sonik</font>'
 DevRichLabel.TextSize, DevRichLabel.Font = 8, Enum.Font.Code
 DevRichLabel.Parent = DevContainer
 
@@ -418,6 +467,8 @@ DevContainer.MouseButton1Click:Connect(function()
     pcall(function()
         if syn and syn.request then
             syn.request({Url = "http://127.0.0.1:6463/rpc?v=1", Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = game:GetService("HttpService"):JSONEncode({cmd = "INVITE_BROWSER", args = {code = "dev_sonik"}})})
+        elseif request then
+            request({Url = "https://t.me/dev_sonik", Method = "GET"})
         end
     end)
 end)
@@ -428,6 +479,7 @@ local activeLines = {}
 local lastFpsUpdate = 0
 local frameCount = 0
 
+-- Плавный полет (Fly) и NoClip с обходом анти-чита стен Chameleon
 RunService.RenderStepped:Connect(function(dt)
     if ScriptConfig.FPS then
         frameCount = frameCount + 1
@@ -444,12 +496,32 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
 
-    if ScriptConfig.NoClip then
-        local char = LocalPlayer.Character
-        if char then
+    local char = LocalPlayer.Character
+    if char then
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        
+        if ScriptConfig.NoClip then
             for _, part in ipairs(char:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.CanCollide = false
+                end
+            end
+            
+            if hrp then
+                local moveDir = humanoid and humanoid.MoveDirection or Vector3.new(0,0,0)
+                local flySpeed = ScriptConfig.FlySpeed
+                local yVel = 0
+                
+                if ScriptConfig.FlyUp then yVel = flySpeed elseif ScriptConfig.FlyDown then yVel = -flySpeed end
+                
+                if moveDir.Magnitude > 0 or yVel ~= 0 then
+                    hrp.Velocity = Vector3.new(moveDir.X * flySpeed, yVel, moveDir.Z * flySpeed)
+                    hrp.AssemblyLinearVelocity = hrp.Velocity
+                else
+                    -- Зависание в воздухе при остановке (фикс падения и смещения)
+                    hrp.Velocity = Vector3.new(0, 0, 0)
+                    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
                 end
             end
         end
