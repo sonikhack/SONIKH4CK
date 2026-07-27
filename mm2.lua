@@ -1,4 +1,3 @@
-  MM2 | SONIK H4CK
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
