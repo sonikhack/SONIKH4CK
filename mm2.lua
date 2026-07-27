@@ -15,6 +15,9 @@ _G.ServerHop = false
 _G.SafeZone = false
 _G.KillAura = false
 _G.GrabGun = false
+_G.Aimbot = false
+
+local currentThemeColor = Color3.fromRGB(0, 255, 0)
 
 local function getRole(player)
 	local char = player.Character
@@ -28,58 +31,40 @@ local function getRole(player)
 	end
 end
 
-local function applyEsp(char, color)
-	if not char then return end
-	for _, part in ipairs(char:GetDescendants()) do
-		if part:IsA("BasePart") then
-			if not part:FindFirstChild("EspBox") then
-				local box = Instance.new("BoxHandleAdornment")
-				box.Name = "EspBox"
-				box.Adornee = part
-				box.AlwaysOnTop = true
-				box.ZIndex = 10
-				box.Size = part.Size + Vector3.new(0.1, 0.1, 0.1)
-				box.Color3 = color
-				box.Transparency = 0.4
-				box.Parent = part
+-- ESP All using Highlight
+local function updateEspAll()
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character then
+			local char = player.Character
+			local hl = char:FindFirstChild("SonikHighlight")
+			if _G.EspAll then
+				if not hl then
+					hl = Instance.new("Highlight")
+					hl.Name = "SonikHighlight"
+					hl.Adornee = char
+					hl.Parent = char
+				end
+				local role = getRole(player)
+				if role == "Murderer" then
+					hl.FillColor = Color3.fromRGB(255, 0, 0)
+					hl.OutlineColor = Color3.fromRGB(255, 0, 0)
+				elseif role == "Sheriff" then
+					hl.FillColor = Color3.fromRGB(0, 120, 255)
+					hl.OutlineColor = Color3.fromRGB(0, 120, 255)
+				else
+					hl.FillColor = Color3.fromRGB(0, 255, 0)
+					hl.OutlineColor = Color3.fromRGB(0, 255, 0)
+				end
+				hl.Enabled = true
 			else
-				part.EspBox.Color3 = color
-				part.EspBox.Visible = _G.EspAll
+				if hl then hl:Destroy() end
 			end
-		end
-	end
-end
-
-local function removeEsp(char)
-	if not char then return end
-	for _, part in ipairs(char:GetDescendants()) do
-		if part:FindFirstChild("EspBox") then
-			part.EspBox:Destroy()
 		end
 	end
 end
 
 RunService.RenderStepped:Connect(function()
-	if _G.EspAll then
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player ~= LocalPlayer and player.Character then
-				local role = getRole(player)
-				local col = Color3.fromRGB(0, 255, 0)
-				if role == "Murderer" then
-					col = Color3.fromRGB(255, 0, 0)
-				elseif role == "Sheriff" then
-					col = Color3.fromRGB(0, 120, 255)
-				end
-				applyEsp(player.Character, col)
-			end
-		end
-	else
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player.Character then
-				removeEsp(player.Character)
-			end
-		end
-	end
+	updateEspAll()
 
 	if _G.EspCoin then
 		for _, obj in ipairs(workspace:GetDescendants()) do
@@ -104,31 +89,47 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
+	-- ESP Gun with Line
 	if _G.EspGun then
 		for _, obj in ipairs(workspace:GetDescendants()) do
 			if obj.Name == "GunDrop" or obj.Name == "Gun" then
-				if obj:IsA("BasePart") and not obj:FindFirstChild("GunText") then
-					local bb = Instance.new("BillboardGui")
-					bb.Name = "GunText"
-					bb.Size = UDim2.new(0, 100, 0, 50)
-					bb.AlwaysOnTop = true
-					bb.Adornee = obj
-					local tl = Instance.new("TextLabel")
-					tl.Parent = bb
-					tl.Size = UDim2.new(1, 0, 1, 0)
-					tl.BackgroundTransparency = 1
-					tl.Text = "GUN"
-					tl.TextColor3 = Color3.fromRGB(255, 140, 0)
-					tl.TextScaled = true
-					tl.Font = Enum.Font.GothamBold
-					bb.Parent = obj
+				if obj:IsA("BasePart") then
+					if not obj:FindFirstChild("GunBox") then
+						local b = Instance.new("BoxHandleAdornment")
+						b.Name = "GunBox"
+						b.Adornee = obj
+						b.AlwaysOnTop = true
+						b.Size = obj.Size + Vector3.new(0.2, 0.2, 0.2)
+						b.Color3 = currentThemeColor
+						b.Transparency = 0.3
+						b.Parent = obj
+					else
+						obj.GunBox.Color3 = currentThemeColor
+					end
+
+					if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+						local line = obj:FindFirstChild("GunLine")
+						if not line then
+							line = Instance.new("LineHandleAdornment")
+							line.Name = "GunLine"
+							line.AlwaysOnTop = true
+							line.Thickness = 3
+							line.Color3 = currentThemeColor
+							line.Adornee = workspace.Terrain
+							line.Parent = obj
+						end
+						line.Color3 = currentThemeColor
+						line.From = LocalPlayer.Character.HumanoidRootPart.Position
+						line.To = obj.Position
+					end
 				end
 			end
 		end
 	else
 		for _, obj in ipairs(workspace:GetDescendants()) do
-			if obj:IsA("BasePart") and obj:FindFirstChild("GunText") then
-				obj.GunText:Destroy()
+			if obj:IsA("BasePart") then
+				if obj:FindFirstChild("GunBox") then obj.GunBox:Destroy() end
+				if obj:FindFirstChild("GunLine") then obj.GunLine:Destroy() end
 			end
 		end
 	end
@@ -336,16 +337,22 @@ local function makeBtn(p, text, y, cb)
 end
 
 makeLbl(CombatSec, "SHERIFF", Color3.fromRGB(0, 120, 255), 5)
-local shootBoxBtn = Instance.new("TextButton")
-shootBoxBtn.Parent = CombatSec
-shootBoxBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-shootBoxBtn.Position = UDim2.new(0, 8, 0, 28)
-shootBoxBtn.Size = UDim2.new(0, 60, 0, 25)
-shootBoxBtn.Font = Enum.Font.GothamBold
-shootBoxBtn.Text = "SHOOT"
-shootBoxBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-shootBoxBtn.TextSize = 10
-shootBoxBtn.MouseButton1Click:Connect(function()
+
+local floatingAimBtn = Instance.new("TextButton")
+floatingAimBtn.Parent = ScreenGui
+floatingAimBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+floatingAimBtn.BorderColor3 = Color3.fromRGB(40, 40, 40)
+floatingAimBtn.Position = UDim2.new(0, 150, 0, 50)
+floatingAimBtn.Size = UDim2.new(0, 70, 0, 30)
+floatingAimBtn.Font = Enum.Font.GothamBold
+floatingAimBtn.Text = "SHOOT"
+floatingAimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+floatingAimBtn.TextSize = 12
+floatingAimBtn.Active = true
+floatingAimBtn.Draggable = true
+floatingAimBtn.Visible = false
+
+floatingAimBtn.MouseButton1Click:Connect(function()
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p ~= LocalPlayer and getRole(p) == "Murderer" and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
 			Camera.CFrame = CFrame.new(Camera.CFrame.Position, p.Character.HumanoidRootPart.Position)
@@ -358,6 +365,11 @@ shootBoxBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+makeBtn(CombatSec, "AIMBOT", 28, function(v)
+	_G.Aimbot = v
+	floatingAimBtn.Visible = v
+end)
+
 makeLbl(CombatSec, "MURDER", Color3.fromRGB(255, 0, 0), 58)
 makeBtn(CombatSec, "Kill Aura", 80, function(v) _G.KillAura = v end)
 
@@ -367,6 +379,38 @@ makeBtn(CombatSec, "Grab Gun", 132, function(v) _G.GrabGun = v end)
 makeBtn(EspSec, "ESP ALL", 8, function(v) _G.EspAll = v end)
 makeBtn(EspSec, "ESP COIN", 38, function(v) _G.EspCoin = v end)
 makeBtn(EspSec, "ESP GUN", 68, function(v) _G.EspGun = v end)
+
+local colors = {
+	{Name = "Синий", Color = Color3.fromRGB(0, 120, 255)},
+	{Name = "Красный", Color = Color3.fromRGB(255, 0, 0)},
+	{Name = "Зеленый", Color = Color3.fromRGB(0, 255, 0)},
+	{Name = "Белый", Color = Color3.fromRGB(255, 255, 255)},
+	{Name = "Желтый", Color = Color3.fromRGB(255, 255, 0)},
+	{Name = "Фиолетовый", Color = Color3.fromRGB(170, 0, 255)}
+}
+
+local colorContainer = Instance.new("ScrollingFrame")
+colorContainer.Parent = EspSec
+colorContainer.BackgroundTransparency = 1
+colorContainer.Position = UDim2.new(0, 8, 0, 98)
+colorContainer.Size = UDim2.new(1, -16, 0, 105)
+colorContainer.CanvasSize = UDim2.new(0, 0, 0, #colors * 28)
+colorContainer.ScrollBarThickness = 2
+
+for i, colData in ipairs(colors) do
+	local cBtn = Instance.new("TextButton")
+	cBtn.Parent = colorContainer
+	cBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	cBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 28)
+	cBtn.Size = UDim2.new(1, 0, 0, 24)
+	cBtn.Font = Enum.Font.Gotham
+	cBtn.Text = colData.Name
+	cBtn.TextColor3 = colData.Color
+	cBtn.TextSize = 11
+	cBtn.MouseButton1Click:Connect(function()
+		currentThemeColor = colData.Color
+	end)
+end
 
 makeBtn(MiscSec, "AutoFarm", 8, function(v) _G.AutoFarm = v end)
 makeBtn(MiscSec, "ANTI-AFK", 38, function(v) _G.AntiAfk = v end)
@@ -384,13 +428,17 @@ fpsPingBtn.TextSize = 11
 local statDisplay = Instance.new("TextLabel")
 statDisplay.Parent = ScreenGui
 statDisplay.BackgroundTransparency = 1
-statDisplay.Position = UDim2.new(0.5, -150, 1, -30)
-statDisplay.Size = UDim2.new(0, 300, 0, 20)
+statDisplay.Position = UDim2.new(0.5, -150, 1, -35)
+statDisplay.Size = UDim2.new(0, 300, 0, 25)
 statDisplay.Font = Enum.Font.GothamBold
 statDisplay.Text = ""
-statDisplay.TextColor3 = Color3.fromRGB(0, 255, 0)
 statDisplay.TextSize = 14
 statDisplay.Visible = false
+
+local stroke = Instance.new("UIStroke")
+stroke.Parent = statDisplay
+stroke.Thickness = 1.5
+stroke.Color = Color3.fromRGB(0, 0, 0)
 
 fpsPingBtn.MouseButton1Click:Connect(function()
 	_G.FpsPing = not _G.FpsPing
@@ -403,6 +451,7 @@ RunService.RenderStepped:Connect(function()
 		local fps = math.round(1 / RunService.RenderStepped:Wait())
 		local ping = math.round(LocalPlayer:GetNetworkPing() * 1000)
 		statDisplay.Text = "FPS: " .. tostring(fps) .. " / PING: " .. tostring(ping) .. "ms"
+		statDisplay.TextColor3 = currentThemeColor
 	end
 end)
 
