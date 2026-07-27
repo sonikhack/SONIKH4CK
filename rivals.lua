@@ -1,7 +1,3 @@
---[[
-    SONIK HACK | RIVALS
-]]--
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -9,13 +5,11 @@ local Workspace = game:GetService("Workspace")
 local Camera = Workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- UI Library Setup (Mobile-friendly minimalist layout)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SonikHackRivals"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Protect GUI if executor supports it
 if syn and syn.protect_gui then
     syn.protect_gui(ScreenGui)
     ScreenGui.Parent = CoreGui
@@ -25,7 +19,6 @@ else
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 end
 
--- State Variables
 getgenv().SonikConfig = {
     Aimbot = false,
     AimSilent = false,
@@ -35,10 +28,9 @@ getgenv().SonikConfig = {
     
     EspBox = false,
     EspLine = false,
-    Skeleton = false,
     HpBar = false,
     Chams = false,
-    EspColor = Color3.fromRGB(255, 0, 0), -- Default Red
+    EspColor = Color3.fromRGB(255, 0, 0),
     
     SpeedHack = false,
     InfJump = false,
@@ -46,7 +38,6 @@ getgenv().SonikConfig = {
     WallHack = false
 }
 
--- FOV Circle
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Visible = false
 FOVCircle.Filled = false
@@ -54,11 +45,10 @@ FOVCircle.Thickness = 1.5
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
 FOVCircle.Transparency = 0.8
 
--- Main Window (Mobile Draggable)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 420, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -160)
+MainFrame.Size = UDim2.new(0, 420, 0, 325)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -162)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -69,7 +59,6 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
--- Top Title Bar
 local TitleBar = Instance.new("TextLabel")
 TitleBar.Name = "TitleBar"
 TitleBar.Size = UDim2.new(1, 0, 0, 40)
@@ -77,10 +66,9 @@ TitleBar.BackgroundTransparency = 1
 TitleBar.Font = Enum.Font.SourceSansBold
 TitleBar.TextSize = 20
 TitleBar.RichText = true
-TitleBar.Text = '<font color="#0055FF">SONIK</font><font color="#FFFFFF">HACK</font>  |  <font color="#FF0000">RIV</font><font color="#00FF00">ALS</font>'
+TitleBar.Text = '<font color="#0055FF">SONIK</font> <font color="#FFFFFF">HACK</font>  |  <font color="#FF0000">RIVALS</font>'
 TitleBar.Parent = MainFrame
 
--- Floating Mobile Button with ♤ symbol to hide/show menu
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "ToggleButton"
 ToggleButton.Size = UDim2.new(0, 50, 0, 50)
@@ -102,17 +90,13 @@ ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Sidebar Tabs
-local TabContainer = Instance.new("ScrollingFrame")
+local TabContainer = Instance.new("Frame")
 TabContainer.Name = "TabContainer"
 TabContainer.Size = UDim2.new(0, 110, 1, -50)
 TabContainer.Position = UDim2.new(0, 0, 0, 45)
 TabContainer.BackgroundTransparency = 1
-TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-TabContainer.ScrollBarThickness = 2
 TabContainer.Parent = MainFrame
 
--- Content Pages Container
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
 ContentFrame.Size = UDim2.new(1, -120, 1, -50)
@@ -121,23 +105,32 @@ ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
 
 local function createPage(name)
-    local page = Instance.new("ScrollingFrame")
+    local page = Instance.new("Frame")
     page.Name = name .. "Page"
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.CanvasSize = UDim2.new(0, 0, 0, 400)
-    page.ScrollBarThickness = 4
     page.Parent = ContentFrame
+    
+    local tgLabel = Instance.new("TextLabel")
+    tgLabel.Size = UDim2.new(1, -10, 0, 20)
+    tgLabel.Position = UDim2.new(0, 5, 1, -22)
+    tgLabel.BackgroundTransparency = 1
+    tgLabel.Font = Enum.Font.SourceSansBold
+    tgLabel.TextSize = 12
+    tgLabel.RichText = true
+    tgLabel.TextXAlignment = Enum.TextXAlignment.Center
+    tgLabel.Text = '<font color="#0055FF">Telegram Channel</font> @dev_sonik'
+    tgLabel.Parent = page
+    
     return page
 end
 
 local CombatPage = createPage("Combat")
 local VisualsPage = createPage("Visuals")
 local BrutalPage = createPage("Brutal")
-CombatPage.Visible = true -- Default active page
+CombatPage.Visible = true
 
--- Helper to create Tab Buttons
 local function createTabButton(text, page, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 35)
@@ -165,49 +158,52 @@ createTabButton("Combat", CombatPage, 1)
 createTabButton("Visuals", VisualsPage, 2)
 createTabButton("Brutal", BrutalPage, 3)
 
--- Helper: Toggle Switch UI Element
 local function createToggle(parent, text, callback, initial)
-    local yPos = #parent:GetChildren() * 35 - 35
+    local yPos = (#parent:GetChildren() - 2) * 32
     local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(1, -10, 0, 30)
+    toggleBtn.Size = UDim2.new(1, -10, 0, 28)
     toggleBtn.Position = UDim2.new(0, 5, 0, yPos)
-    toggleBtn.BackgroundColor3 = initial and Color3.fromRGB(0, 120, 60) or Color3.fromRGB(40, 40, 50)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
     toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleBtn.TextSize = 13
-    toggleBtn.Font = Enum.Font.SourceSans
+    toggleBtn.TextSize = 12
+    toggleBtn.Font = Enum.Font.SourceSansBold
     toggleBtn.TextXAlignment = Enum.TextXAlignment.Left
-    toggleBtn.Text = "  " .. text .. ": " .. (initial and "ON" or "OFF")
+    toggleBtn.Text = "  " .. text
     toggleBtn.Parent = parent
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 5)
     corner.Parent = toggleBtn
     
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 1.5
+    stroke.Color = initial and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    stroke.Parent = toggleBtn
+    
     local state = initial
     toggleBtn.MouseButton1Click:Connect(function()
         state = not state
-        toggleBtn.BackgroundColor3 = state and Color3.fromRGB(0, 120, 60) or Color3.fromRGB(40, 40, 50)
-        toggleBtn.Text = "  " .. text .. ": " .. (state and "ON" or "OFF")
+        stroke.Color = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
         callback(state)
     end)
 end
 
--- Helper: Selector / Options Grid (for Aim Part & Colors)
 local function createOptionsGrid(parent, titleText, options, callback)
+    local yPos = (#parent:GetChildren() - 2) * 32
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 0, 20)
-    label.Position = UDim2.new(0, 5, 0, #parent:GetChildren() * 35 - 35)
+    label.Size = UDim2.new(1, -10, 0, 18)
+    label.Position = UDim2.new(0, 5, 0, yPos)
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    label.TextSize = 12
+    label.TextSize = 11
     label.Font = Enum.Font.SourceSansBold
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Text = " " .. titleText
     label.Parent = parent
     
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -10, 0, 30)
-    container.Position = UDim2.new(0, 5, 0, #parent:GetChildren() * 35 - 30)
+    container.Size = UDim2.new(1, -10, 0, 26)
+    container.Position = UDim2.new(0, 5, 0, yPos + 18)
     container.BackgroundTransparency = 1
     container.Parent = parent
     
@@ -233,22 +229,22 @@ local function createOptionsGrid(parent, titleText, options, callback)
     end
 end
 
--- Helper: Slider for FOV
 local function createSlider(parent, text, min, max, initial, callback)
+    local yPos = (#parent:GetChildren() - 2) * 32
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 0, 20)
-    label.Position = UDim2.new(0, 5, 0, #parent:GetChildren() * 35 - 35)
+    label.Size = UDim2.new(1, -10, 0, 18)
+    label.Position = UDim2.new(0, 5, 0, yPos)
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    label.TextSize = 12
+    label.TextSize = 11
     label.Font = Enum.Font.SourceSansBold
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Text = " " .. text .. ": " .. initial
     label.Parent = parent
     
     local sliderBg = Instance.new("Frame")
-    sliderBg.Size = UDim2.new(1, -10, 0, 15)
-    sliderBg.Position = UDim2.new(0, 5, 0, #parent:GetChildren() * 35 - 25)
+    sliderBg.Size = UDim2.new(1, -10, 0, 14)
+    sliderBg.Position = UDim2.new(0, 5, 0, yPos + 18)
     sliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     sliderBg.Parent = parent
     
@@ -287,12 +283,9 @@ local function createSlider(parent, text, min, max, initial, callback)
     end)
 end
 
---------------------------------------------------------------------------------
--- BUILD COMBAT TAB
---------------------------------------------------------------------------------
 createToggle(CombatPage, "AIMBOT", function(v) getgenv().SonikConfig.Aimbot = v end, false)
 createToggle(CombatPage, "AIM SILENT", function(v) getgenv().SonikConfig.AimSilent = v end, false)
-createSlider(CombatPage, "FOV Radius", 45, 360, 45, function(v) 
+createSlider(CombatPage, "FOV", 45, 360, 45, function(v) 
     getgenv().SonikConfig.FovSize = v 
     FOVCircle.Radius = v
 end)
@@ -301,12 +294,8 @@ createOptionsGrid(CombatPage, "Aim Part", {"Head", "Neck", "Body", "Leg"}, funct
 end)
 createToggle(CombatPage, "AIM VISIBLE", function(v) getgenv().SonikConfig.AimVisible = v end, true)
 
---------------------------------------------------------------------------------
--- BUILD VISUALS TAB
---------------------------------------------------------------------------------
 createToggle(VisualsPage, "ESP BOX", function(v) getgenv().SonikConfig.EspBox = v end, false)
 createToggle(VisualsPage, "ESP LINE", function(v) getgenv().SonikConfig.EspLine = v end, false)
-createToggle(VisualsPage, "SKELETON", function(v) getgenv().SonikConfig.Skeleton = v end, false)
 createToggle(VisualsPage, "HP BAR", function(v) getgenv().SonikConfig.HpBar = v end, false)
 createToggle(VisualsPage, "CHAMS", function(v) getgenv().SonikConfig.Chams = v end, false)
 
@@ -320,19 +309,11 @@ createOptionsGrid(VisualsPage, "ESP Colors", colorOptions, function(v)
     getgenv().SonikConfig.EspColor = v
 end)
 
---------------------------------------------------------------------------------
--- BUILD BRUTAL TAB
---------------------------------------------------------------------------------
-createToggle(BrutalPage, "SPEED HACK (3x)", function(v) getgenv().SonikConfig.SpeedHack = v end, false)
+createToggle(BrutalPage, "SPEED HACK", function(v) getgenv().SonikConfig.SpeedHack = v end, false)
 createToggle(BrutalPage, "INF JUMP", function(v) getgenv().SonikConfig.InfJump = v end, false)
-createToggle(BrutalPage, "AIM KILL (Auto)", function(v) getgenv().SonikConfig.AimKill = v end, false)
+createToggle(BrutalPage, "AIM KILL", function(v) getgenv().SonikConfig.AimKill = v end, false)
 createToggle(BrutalPage, "WALL HACK", function(v) getgenv().SonikConfig.WallHack = v end, false)
 
---------------------------------------------------------------------------------
--- CORE CHEATS LOGIC & EXECUTION LOOPS
---------------------------------------------------------------------------------
-
--- Helper function to check visibility (Aim Visible)
 local function isVisible(targetPart)
     if not getgenv().SonikConfig.AimVisible then return true end
     local origin = Camera.CFrame.Position
@@ -348,7 +329,6 @@ local function isVisible(targetPart)
     return true
 end
 
--- Get closest enemy inside FOV
 local function getClosestEnemy()
     local closestTarget = nil
     local shortestDist = getgenv().SonikConfig.FovSize
@@ -377,9 +357,7 @@ local function getClosestEnemy()
     return closestTarget
 end
 
--- Main Render Loop
 RunService.RenderStepped:Connect(function()
-    -- FOV Update
     if getgenv().SonikConfig.Aimbot or getgenv().SonikConfig.AimKill then
         FOVCircle.Visible = true
         FOVCircle.Position = UserInputService:GetMouseLocation()
@@ -388,7 +366,6 @@ RunService.RenderStepped:Connect(function()
         FOVCircle.Visible = false
     end
     
-    -- Aimbot Logic
     if getgenv().SonikConfig.Aimbot then
         local target = getClosestEnemy()
         if target then
@@ -396,7 +373,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
     
-    -- Aim Kill Logic (Auto shoot/aim when enemy within FOV and visible)
     if getgenv().SonikConfig.AimKill then
         local target = getClosestEnemy()
         if target then
@@ -408,15 +384,13 @@ RunService.RenderStepped:Connect(function()
         end
     end
     
-    -- Speed Hack Logic (3x speed boost)
     if getgenv().SonikConfig.SpeedHack and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         local hum = LocalPlayer.Character.Humanoid
-        hum.WalkSpeed = 16 * 3
+        hum.WalkSpeed = 48
     elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = 16
     end
     
-    -- Wall Hack / Noclip logic
     if getgenv().SonikConfig.WallHack and LocalPlayer.Character then
         for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") then
@@ -424,16 +398,36 @@ RunService.RenderStepped:Connect(function()
             end
         end
     end
+    
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local char = player.Character
+            local hl = char:FindFirstChild("SonikChamsHighlight")
+            if getgenv().SonikConfig.Chams then
+                if not hl then
+                    hl = Instance.new("Highlight")
+                    hl.Name = "SonikChamsHighlight"
+                    hl.Adornee = char
+                    hl.Parent = char
+                end
+                hl.FillColor = getgenv().SonikConfig.EspColor
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                hl.Enabled = true
+            else
+                if hl then
+                    hl.Enabled = false
+                end
+            end
+        end
+    end
 end)
 
--- Infinite Jump Logic
 UserInputService.JumpRequest:Connect(function()
     if getgenv().SonikConfig.InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
 
--- Visual ESP Elements tracking
 local espDrawings = {}
 
 local function removeEsp(player)
@@ -475,7 +469,6 @@ RunService.RenderStepped:Connect(function()
                 
                 local visuals = espDrawings[player]
                 local hrp = char.HumanoidRootPart
-                local head = char:FindFirstChild("Head")
                 local color = getgenv().SonikConfig.EspColor
                 
                 local vector, onScreen = Camera:WorldToViewportPoint(hrp.Position)
@@ -485,7 +478,6 @@ RunService.RenderStepped:Connect(function()
                     local height = math.abs(headVec.Y - legVec.Y)
                     local width = height / 2
                     
-                    -- Box ESP
                     if getgenv().SonikConfig.EspBox then
                         visuals.Box.Visible = true
                         visuals.Box.Size = Vector2.new(width, height)
@@ -495,7 +487,6 @@ RunService.RenderStepped:Connect(function()
                         visuals.Box.Visible = false
                     end
                     
-                    -- Line ESP
                     if getgenv().SonikConfig.EspLine then
                         visuals.Line.Visible = true
                         visuals.Line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
@@ -505,18 +496,17 @@ RunService.RenderStepped:Connect(function()
                         visuals.Line.Visible = false
                     end
                     
-                    -- HP Bar (Vertical on right side + numeric text on top)
                     if getgenv().SonikConfig.HpBar then
                         local hp = char.Humanoid.Health
                         local maxHp = char.Humanoid.MaxHealth
                         local hpPercent = math.clamp(hp / maxHp, 0, 1)
                         
                         visuals.HpBg.Visible = true
-                        visuals.HpBg.Size = Vector2.new(4, height)
+                        visuals.HpBg.Size = Vector2.new(6, height)
                         visuals.HpBg.Position = Vector2.new(vector.X + width / 2 + 3, vector.Y - height / 2)
                         
                         visuals.HpBar.Visible = true
-                        visuals.HpBar.Size = Vector2.new(2, height * hpPercent)
+                        visuals.HpBar.Size = Vector2.new(4, height * hpPercent)
                         visuals.HpBar.Position = Vector2.new(visuals.HpBg.Position.X + 1, visuals.HpBg.Position.Y + (height * (1 - hpPercent)))
                         visuals.HpBar.Color = Color3.fromRGB(0, 255, 0)
                         
