@@ -22,7 +22,7 @@ end
 getgenv().SonikConfig = {
     Aimbot = false,
     AimSilent = false,
-    FovSize = 45,
+    FovSize = 80,
     AimPart = "Head",
     AimVisible = true,
     
@@ -39,16 +39,16 @@ getgenv().SonikConfig = {
 }
 
 local FOVCircle = Drawing.new("Circle")
-FOVCircle.Visible = false
+FOVCircle.Visible = true
 FOVCircle.Filled = false
-FOVCircle.Thickness = 1.5
+FOVCircle.Thickness = 2
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
-FOVCircle.Transparency = 0.8
+FOVCircle.Transparency = 1
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 420, 0, 275)
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -137)
+MainFrame.Size = UDim2.new(0, 400, 0, 255)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -127)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -59,24 +59,32 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
+local BgGradient = Instance.new("UIGradient")
+BgGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 35)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 15))
+})
+BgGradient.Rotation = 45
+BgGradient.Parent = MainFrame
+
 local TitleBar = Instance.new("TextLabel")
 TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.Size = UDim2.new(1, 0, 0, 32)
 TitleBar.BackgroundTransparency = 1
-TitleBar.Font = Enum.Font.SourceSansBold
-TitleBar.TextSize = 18
+TitleBar.Font = Enum.Font.SourceSans
+TitleBar.TextSize = 17
 TitleBar.RichText = true
 TitleBar.Text = '<font color="#0055FF">SONIK</font> <font color="#FFFFFF">HACK</font>  |  <font color="#FF0000">RIVALS</font>'
 TitleBar.Parent = MainFrame
 
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Name = "ToggleButton"
-ToggleButton.Size = UDim2.new(0, 45, 0, 45)
+ToggleButton.Size = UDim2.new(0, 42, 0, 42)
 ToggleButton.Position = UDim2.new(0, 20, 0, 100)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.TextSize = 20
-ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.TextSize = 18
+ToggleButton.Font = Enum.Font.SourceSans
 ToggleButton.Text = "♤"
 ToggleButton.Active = true
 ToggleButton.Draggable = true
@@ -92,15 +100,15 @@ end)
 
 local TabContainer = Instance.new("Frame")
 TabContainer.Name = "TabContainer"
-TabContainer.Size = UDim2.new(0, 110, 1, -40)
-TabContainer.Position = UDim2.new(0, 0, 0, 35)
+TabContainer.Size = UDim2.new(0, 105, 1, -38)
+TabContainer.Position = UDim2.new(0, 0, 0, 32)
 TabContainer.BackgroundTransparency = 1
 TabContainer.Parent = MainFrame
 
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -120, 1, -40)
-ContentFrame.Position = UDim2.new(0, 115, 0, 35)
+ContentFrame.Size = UDim2.new(1, -115, 1, -38)
+ContentFrame.Position = UDim2.new(0, 110, 0, 32)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
 
@@ -113,14 +121,14 @@ local function createPage(name)
     page.Parent = ContentFrame
     
     local tgLabel = Instance.new("TextLabel")
-    tgLabel.Size = UDim2.new(1, -10, 0, 18)
-    tgLabel.Position = UDim2.new(0, 5, 1, -20)
+    tgLabel.Size = UDim2.new(1, -10, 0, 16)
+    tgLabel.Position = UDim2.new(0, 5, 1, -18)
     tgLabel.BackgroundTransparency = 1
-    tgLabel.Font = Enum.Font.SourceSansBold
-    tgLabel.TextSize = 11
+    tgLabel.Font = Enum.Font.SourceSans
+    tgLabel.TextSize = 10
     tgLabel.RichText = true
     tgLabel.TextXAlignment = Enum.TextXAlignment.Center
-    tgLabel.Text = '<font color="#0055FF">Telegram Channel</font> @dev_sonik'
+    tgLabel.Text = '<font color="#0055FF">Telegram Channel</font> <font color="#FFFFFF">@dev_sonik</font>'
     tgLabel.Parent = page
     
     return page
@@ -133,17 +141,17 @@ CombatPage.Visible = true
 
 local function createTabButton(text, page, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 32)
-    btn.Position = UDim2.new(0, 5, 0, (order - 1) * 36)
+    btn.Size = UDim2.new(1, -8, 0, 30)
+    btn.Position = UDim2.new(0, 4, 0, (order - 1) * 34)
     btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 13
-    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 12
+    btn.Font = Enum.Font.SourceSans
     btn.Text = text
     btn.Parent = TabContainer
     
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
+    corner.CornerRadius = UDim.new(0, 5)
     corner.Parent = btn
     
     btn.MouseButton1Click:Connect(function()
@@ -159,14 +167,14 @@ createTabButton("Visuals", VisualsPage, 2)
 createTabButton("Brutal", BrutalPage, 3)
 
 local function createToggle(parent, text, callback, initial)
-    local yPos = (#parent:GetChildren() - 2) * 28
+    local yPos = (#parent:GetChildren() - 2) * 27
     local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(1, -10, 0, 24)
-    toggleBtn.Position = UDim2.new(0, 5, 0, yPos)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    toggleBtn.Size = UDim2.new(1, -8, 0, 23)
+    toggleBtn.Position = UDim2.new(0, 4, 0, yPos)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
     toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     toggleBtn.TextSize = 11
-    toggleBtn.Font = Enum.Font.SourceSansBold
+    toggleBtn.Font = Enum.Font.SourceSans
     toggleBtn.TextXAlignment = Enum.TextXAlignment.Left
     toggleBtn.Text = "  " .. text
     toggleBtn.Parent = parent
@@ -177,33 +185,46 @@ local function createToggle(parent, text, callback, initial)
     
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 1.5
-    stroke.Color = initial and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+    stroke.Color = initial and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(60, 60, 80)
     stroke.Parent = toggleBtn
+    
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Size = UDim2.new(0, 50, 1, 0)
+    statusLabel.Position = UDim2.new(1, -55, 0, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Font = Enum.Font.SourceSans
+    statusLabel.TextSize = 11
+    statusLabel.TextColor3 = initial and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(150, 150, 150)
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Right
+    statusLabel.Text = initial and "ON" or "OFF"
+    statusLabel.Parent = toggleBtn
     
     local state = initial
     toggleBtn.MouseButton1Click:Connect(function()
         state = not state
-        stroke.Color = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+        stroke.Color = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(60, 60, 80)
+        statusLabel.TextColor3 = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(150, 150, 150)
+        statusLabel.Text = state and "ON" or "OFF"
         callback(state)
     end)
 end
 
 local function createOptionsGrid(parent, titleText, options, callback)
-    local yPos = (#parent:GetChildren() - 2) * 28
+    local yPos = (#parent:GetChildren() - 2) * 27
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 0, 15)
-    label.Position = UDim2.new(0, 5, 0, yPos)
+    label.Size = UDim2.new(1, -8, 0, 14)
+    label.Position = UDim2.new(0, 4, 0, yPos)
     label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    label.TextColor3 = Color3.fromRGB(180, 180, 180)
     label.TextSize = 10
-    label.Font = Enum.Font.SourceSansBold
+    label.Font = Enum.Font.SourceSans
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Text = " " .. titleText
     label.Parent = parent
     
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -10, 0, 22)
-    container.Position = UDim2.new(0, 5, 0, yPos + 15)
+    container.Size = UDim2.new(1, -8, 0, 20)
+    container.Position = UDim2.new(0, 4, 0, yPos + 14)
     container.BackgroundTransparency = 1
     container.Parent = parent
     
@@ -212,10 +233,10 @@ local function createOptionsGrid(parent, titleText, options, callback)
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1/count, -3, 1, 0)
         btn.Position = UDim2.new((i-1)/count, 1.5, 0, 0)
-        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         btn.TextSize = 10
-        btn.Font = Enum.Font.SourceSansBold
+        btn.Font = Enum.Font.SourceSans
         btn.Text = tostring(opt.name or opt)
         btn.Parent = container
         
@@ -230,28 +251,36 @@ local function createOptionsGrid(parent, titleText, options, callback)
 end
 
 local function createSlider(parent, text, min, max, initial, callback)
-    local yPos = (#parent:GetChildren() - 2) * 28
+    local yPos = (#parent:GetChildren() - 2) * 27
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 0, 15)
-    label.Position = UDim2.new(0, 5, 0, yPos)
+    label.Size = UDim2.new(1, -8, 0, 14)
+    label.Position = UDim2.new(0, 4, 0, yPos)
     label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    label.TextColor3 = Color3.fromRGB(180, 180, 180)
     label.TextSize = 10
-    label.Font = Enum.Font.SourceSansBold
+    label.Font = Enum.Font.SourceSans
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Text = " " .. text .. ": " .. initial
     label.Parent = parent
     
     local sliderBg = Instance.new("Frame")
-    sliderBg.Size = UDim2.new(1, -10, 0, 12)
-    sliderBg.Position = UDim2.new(0, 5, 0, yPos + 15)
-    sliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    sliderBg.Size = UDim2.new(1, -8, 0, 11)
+    sliderBg.Position = UDim2.new(0, 4, 0, yPos + 14)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
     sliderBg.Parent = parent
+    
+    local sliderCorner = Instance.new("UICorner")
+    sliderCorner.CornerRadius = UDim.new(0, 3)
+    sliderCorner.Parent = sliderBg
     
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((initial - min)/(max - min), 0, 1, 0)
     fill.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
     fill.Parent = sliderBg
+    
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(0, 3)
+    fillCorner.Parent = fill
     
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 1, 0)
@@ -285,7 +314,7 @@ end
 
 createToggle(CombatPage, "AIMBOT", function(v) getgenv().SonikConfig.Aimbot = v end, false)
 createToggle(CombatPage, "AIM SILENT", function(v) getgenv().SonikConfig.AimSilent = v end, false)
-createSlider(CombatPage, "FOV", 45, 360, 45, function(v) 
+createSlider(CombatPage, "FOV", 45, 360, 80, function(v) 
     getgenv().SonikConfig.FovSize = v 
     FOVCircle.Radius = v
 end)
